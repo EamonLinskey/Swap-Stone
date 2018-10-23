@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.urls import reverse 
 from django.http import (HttpResponse, HttpResponseRedirect, 
 						HttpResponseNotAllowed)
+import re
 
 # Create your views here.
 def index(request):
@@ -38,7 +40,7 @@ def signedIn(request):
 			login(request, user)
 			return HttpResponseRedirect(reverse("profile"))
 		except:
-			return render(request, "orders/signIn.html", 
+			return render(request, "deckShare/signIn.html", 
 							{"message": "Invalid Credentials",
 							 "username": username})
 	else:

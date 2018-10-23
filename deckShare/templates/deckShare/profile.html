@@ -1,13 +1,55 @@
 {% extends "deckShare/base.html" %}
 
 {% block body %}
-<div class="heading">Swap-Stone</div>
-
-<div class="container">
+<div class="background-containter">
+	<div class="heading">Well Met, {{user.username}}</div>
+	<div class="container">
 	<div class="Profile">
-		<p>Here's the Profile of user {user.username}</p>
-		<p>More profile here</p>
+		<div class="row">
+			<div class="profile-links shadow-lg">
+				<div class="profile-links-header text-center"> Update Collection </div>
+				<div class="profile-links-text">
+					Click Here to Update your collection from HSReplay. If you haven't yet uploaded your collection to HSRpeplay, it is super easy. Just head on over to <a class="HSreplay-link" href="https://hsreplay.net/collection/mine/">HSReplay.net/collection/mine/</a>
+				</div>
+				<div class="last-update profile-links-text">
+					Your collection was last updated on
+				</div>
+			</div>
+			<div class="profile-links shadow-lg">
+				<div class="profile-links-header text-center"> 
+					WishList 
+				</div>
+				<div class="profile-links-text">
+					Click here to view and edit the list of decks that you want to borrow from a friend. All you need to get started is a valid deck code for the deck you want to try!
+				</div>
+				<div class="last-update profile-links-text">
+					Your Wishlist currently has {}  decks in it
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="profile-links shadow-lg">
+				<div class="profile-links-header text-center"> 
+					Find a partner  
+				</div>
+				<div class="profile-links-text">
+					Click here to see a list of people who both have cards that you want to try out and who want to try out cards from your collection. See what decks they can make and what deck of your that they want to try out.
+				</div>
+			</div>
+			<div class="profile-links shadow-lg">
+				<div class="profile-links-header text-center"> 
+					Feeling Generous? 
+				</div>
+				<div class="profile-links-text">
+					Feel like making someones day or making a new friend by letting them try out a deck that you own? Clicking here will show you a list of people who want to play with your cards!
+				</div>
+			</div>
+		</div>
 	</div>
 </div>
+</div>
+
+
+
 
 {% endblock %}

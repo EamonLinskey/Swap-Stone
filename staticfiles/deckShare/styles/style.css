@@ -1,0 +1,424 @@
+.auth-form{
+    margin: 3% auto auto auto;
+    text-align: center;
+    background-color: white;
+    border: 2px solid #28a745;
+    width: 33%;
+}
+
+.form-center{
+    margin: auto;
+    text-align: center;
+}
+
+.food-container {
+    background-color: white;
+	border: 2px solid #28a745;
+    margin: 1%;
+    width: 47%;
+    padding: 2%;
+    display: inline-block;
+}
+
+.order{
+    padding: 1%;
+    width: 98%;
+}
+
+.orders-table{
+    width: 85% !important;
+    margin: auto;
+}
+
+.price-table{
+    width: 20% !important;
+    margin: auto;
+}
+
+.total-header{
+    width: 20%;
+    background-color: #28a745;
+    margin: auto;
+    text-align: center
+}
+
+.table-head{
+    background-color: #28a745;
+}
+
+.body{
+    background-color: #DCDCDC;
+    font-family: "Palatino";
+}
+
+.message{
+    text-align: center;
+    font-size: 22px;
+}
+
+.greeting{
+    font-size: 22px;
+}
+
+.navbar, .cart{
+    height: 50px;
+}
+
+.nav-link{
+    font-size: 18px;
+}
+
+.cart-container{
+    position: relative;
+}
+
+.heading{
+    text-align: center;
+    font-size: 28pt;
+}
+
+.about{
+    font-size: 14pt;
+    text-indent: 5%;
+}
+
+.about-image{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    height: 360px;
+}
+
+.add{
+    background: green;
+} 
+
+.subtract {
+    background: red;
+}
+
+.delete {
+    color: red;
+    font-size: 8px;
+    cursor: pointer;
+}
+
+
+.add, .subtract, .order-number{
+    border-radius: 0.7em;
+    margin-right: 5px;
+    text-align: center;
+    display: inline-block;
+    font-weight: bold;
+    line-height: 1.4em;
+    width: 1.4em; 
+    -moz-border-radius: 0.7em;
+    -webkit-border-radius: 0.7em;
+}
+
+
+@keyframes FadeIn {
+  from {
+    background-color: white;
+  }
+  
+  to {
+    background-color: #186aff;
+  }
+}
+
+.order-number{
+    background: #186aff;
+    color: white;
+    position: absolute;
+    bottom: 10%;
+    left: 70%;
+}
+
+.order-number-flash{
+    animation: FadeIn 0.75s ease-in forwards;
+}
+
+
+
+.food-link{
+    text-decoration: none !important;
+    font-size: 30px;
+    color: black;
+}
+
+.menu-container{
+    background-color: white;
+    border: 2px solid #28a745;
+    margin: 2% auto 2% auto;
+    width: 70vw;
+}
+
+.menu-table{
+    margin: auto;
+    margin-bottom: 5%;
+    text-align: center !important;
+    width: 50%;
+    font-size: 14px;
+}
+
+.menu-table th{
+    font-weight: normal;
+    color:  darkgray;
+}
+
+.food-name{
+    font-size: 24px;
+}
+
+
+.inner-pizza-container{
+	background-color: darkgrey;
+	border: 1px solid black;
+	width: 48%;
+	margin: 1%;
+
+}
+
+.order-info-container{
+    background-color: white;
+    border: 2px solid #28a745;
+    width: 32%;
+    margin: auto;
+    margin-bottom: 10%;
+}
+
+#payment-form{
+    display: inline-block;
+    text-align: left;
+}
+
+.input{
+    max-width: 90%;
+    height: calc(2.25rem + 2px);
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.address, .del-inst{
+   width: 48%;
+}
+
+.apt-num{
+   width: 10%;
+}
+
+.zip-code{
+    width: 15%;
+}
+
+.phone{
+    width: 30%;
+}
+
+
+.input-label {
+    width: 50%;
+    text-align: right;
+}
+
+.submit-container {
+    text-align: center;
+    margin: auto;
+}
+
+.ticket{
+    background-color: white;
+    border: 2px solid #28a745;
+    width: 98%;
+    margin: 1%;
+    text-align: center;
+}
+
+.orders-count{
+    background-color: white;
+    border: 2px solid #28a745;
+    font-size: 24px;
+    width: 98%;
+    margin: 1%;
+    text-align: center;
+}
+
+.table {
+    text-align: left;
+}
+
+.quantity-cell {
+    width: 10%;
+}
+
+.style{
+    margin-left: auto;
+    text-align: center;
+    font-size: 30px;
+}
+
+.current-price{
+    font-size: 26px;
+    font-weight: bold;
+}
+
+.section-header{
+    font-size: 20px;
+    background-color: white;
+    border: 2px solid #DCDCDC;
+}
+
+.section-container{
+    background-color: #DCDCDC;
+}
+
+.section-container-many{
+   width: 100%;
+}
+
+.section-container-few{
+   width: 15%;
+   margin: auto;
+}
+
+.order-toggle{
+    margin-left: 1%;
+}
+
+.order-toggle-few{
+    margin: auto;
+}
+
+.quantity-modal {
+    display: block;
+    margin: 0 auto;
+}
+
+.addToCart {
+    width: 30%;
+    margin: 0% auto 1% auto;
+}
+
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+    position: relative;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 0;
+    border: 1px solid #888;
+    width: 80%;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    -webkit-animation-name: animatetop;
+    -webkit-animation-duration: 0.4s;
+    animation-name: animatetop;
+    animation-duration: 0.4s
+}
+
+/* Add Animation */
+@-webkit-keyframes animatetop {
+    from {top:-300px; opacity:0} 
+    to {top:0; opacity:1}
+}
+
+@keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+}
+
+/* The Close Button */
+.close {
+    color: white;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-header {
+    padding: 2px 16px;
+    background-color: #28a745;
+    color: white;
+}
+
+.modal-body {padding: 2px 16px;}
+
+
+
+/**
+ * The CSS shown here will not be introduced in the Quickstart guide, but shows
+ * how you can use CSS to style your Element's container.
+ */
+.StripeElement {
+  background-color: white;
+  height: 40px;
+  padding: 10px 12px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  box-shadow: 0 1px 3px 0 #e6ebf1;
+  -webkit-transition: box-shadow 150ms ease;
+  transition: box-shadow 150ms ease;
+}
+
+
+.StripeElement--focus {
+  box-shadow: 0 1px 3px 0 #cfd7df;
+}
+
+.StripeElement--invalid {
+  border-color: #fa755a;
+}
+
+.StripeElement--webkit-autofill {
+  background-color: #fefde5 !important;
+}
+
+.stripe-container{
+    margin-left: auto;
+    width: 80%;
+}
+
+.stripe-section {
+    margin: auto;
+    display: none
+}
+
+.stripe-label {
+    margin-left: auto;
+}
+
+#payment-submit{
+    display: none;
+}
+
+.submit {
+    margin-left: 50%;
+}

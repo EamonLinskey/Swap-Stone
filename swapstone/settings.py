@@ -16,7 +16,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'abcdefghijklmnopqrstuvwxyz123456789')
@@ -28,7 +27,9 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'abcdefghijklmnopqrstuvwxyz123456789')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['swapstone.herokuapp.com']
+ALLOWED_HOSTS = ['swapstone.herokuapp.com',
+                 'localhost',
+                 '127.0.0.1']
 
 
 # Application definition
@@ -121,3 +122,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
