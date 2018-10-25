@@ -6,6 +6,37 @@ from django.http import (HttpResponse, HttpResponseRedirect,
 						HttpResponseNotAllowed)
 import re
 
+# globals
+DECK_SIZE = 30
+
+def validate_deck_code(deckString, FULL_COLLECTION):
+    # Makes sure deckstring is syntactically valid
+    try:
+        deck = Deck.from_deckstring(deckString)
+    except:
+        return False
+    
+    # Checks if deck length is equal to the Standard Hearthstone decklength
+    if sum([int(cardNum) for _,cardNum in deck.cards]) != DECK_SIZE:
+        return False
+
+    # Checks if each "card" corresponds to an actual Hearthstone card
+    classes = []
+    for cardId,_ in deck.cards:
+        if cardId not in FULL_COLLECTION:
+            return False
+        # creates a list of classes used to make a deck
+        if FULL_COLLECTION[cardId]["class"] not in classes and FULL_COLLECTION[cardId]["class"] != "NEUTRAL":
+            classes += [COLLECTION_CLASSES[cardId]]
+    
+    # Makes sure only one class (and neutrals) can be in a deck (It can also be all neutrals)
+    if len(classes) <= 1:
+        return True
+    return False
+
+
+
+
 # Create your views here.
 def index(request):
 	return render(request, "deckShare/index.html")
@@ -97,5 +128,12 @@ def registered(request):
 				return render(request, "deckShare/register.html", 
 							{"message": "An unknown error occured",
 							"email": email, "username": username})	
+	else:
+		return HttpResponseRedirect(reverse("index"))
+
+
+def wishList(request):
+	if request.user.is_authenticated:
+		return render(request, "deckShare/wishList.html")
 	else:
 		return HttpResponseRedirect(reverse("index"))
