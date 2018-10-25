@@ -18,9 +18,9 @@
 			<tbody>
 				{% for deck in wishList %}
 				<tr>
-					<td>{{deck}}</td>
-					<td>Otto</td>
-					<td>@mdo</td>
+					<td>{{deck.name}}</td>
+					<td>{{deck.deckClass}}</td>
+					<td>{{deck.deckString}}</td>
 				</tr>
 				{% endfor %}
 			</tbody>
