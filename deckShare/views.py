@@ -51,7 +51,10 @@ def register(request):
 	if request.user.is_authenticated:
 		return HttpResponseRedirect(reverse("profile"))
 	else:
-		return render(request, "deckShare/register.html")
+		# This temporarily disables new accounts so I can test online 
+		# without anyone being able to make an account
+		return HttpResponseRedirect(reverse("index"))
+		#return render(request, "deckShare/register.html")
 
 def registered(request):
 	if (request.method == "POST"):
