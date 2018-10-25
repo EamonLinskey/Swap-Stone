@@ -135,6 +135,7 @@ def registered(request):
 
 def wishList(request):
 	if request.user.is_authenticated:
-		return render(request, "deckShare/wishList.html")
+		wishList = Player.objects.filter(blizzTag="Linsk#123").wishList
+		return render(request, "deckShare/wishList.html", {"wishList": wishList})
 	else:
 		return HttpResponseRedirect(reverse("index"))
