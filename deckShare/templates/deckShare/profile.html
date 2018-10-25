@@ -1,12 +1,15 @@
 {% extends "deckShare/base.html" %}
 
 {% block body %}
+{% load static %}
+<script src= "{% static "deckShare/scripts/profile-links.js" %}"></script>
+<script></script>
 <div class="background-containter">
 	<div class="heading">Well Met, {{user.username}}</div>
 	<div class="container">
 	<div class="Profile">
 		<div class="row">
-			<div class="profile-links shadow-lg">
+			<div class="profile-links shadow-lg updateCollection">
 				<div class="profile-links-header text-center"> Update Collection </div>
 				<div class="profile-links-text">
 					Click Here to Update your collection from HSReplay. If you haven't yet uploaded your collection to HSRpeplay, it is super easy. Just head on over to <a class="HSreplay-link" href="https://hsreplay.net/collection/mine/">HSReplay.net/collection/mine/</a>

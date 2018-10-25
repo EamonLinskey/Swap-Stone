@@ -28,6 +28,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'abcdefghijklmnopqrstuvwxyz123456789')
 DEBUG = True
 
 ALLOWED_HOSTS = ['swapstone.herokuapp.com',
+                 '.swap-stone.com'
                  'localhost',
                  '127.0.0.1']
 
