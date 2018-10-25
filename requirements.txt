@@ -1,4 +1,5 @@
 django == 2.0.8.
 gunicorn
 whitenoise
-requests requests_oauthlib
+requests 
+requests_oauthlib
