@@ -9,10 +9,10 @@ class Deck(models.Model):
 class Player(models.Model):
 	blizzTag = models.CharField(max_length=100)
 	wishList = models.ManyToManyField(Deck, blank=True)
-	matches = models.ManyToManyField(Match, blank=True)
+	matches = models.ManyToManyField('Match', blank=True)
 
 class Match(models.Model):
-	player1 = models.ForeignKey(Player, on_delete=models.CASCADE)
-	player2 = models.ForeignKey(Player, on_delete=models.CASCADE)
+	player1 = models.ForeignKey(Player, on_delete=models.CASCADE, related_name="player1")
+	player2 = models.ForeignKey(Player, on_delete=models.CASCADE, related_name="player2")
 	deckString1 = models.CharField(max_length=200)
 	deckString2 = models.CharField(max_length=200)

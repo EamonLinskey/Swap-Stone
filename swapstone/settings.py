@@ -37,6 +37,7 @@ ALLOWED_HOSTS = ['swapstone.herokuapp.com',
 # Application definition
 
 INSTALLED_APPS = [
+    'deckShare.apps.DeckshareConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -89,7 +90,9 @@ DATABASES = {
     }
 }
 
-DATABASES['default'] =  dj_database_url.config()
+
+db_from_env = dj_database_url.config()
+DATABASES['default'].update(db_from_env)
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators

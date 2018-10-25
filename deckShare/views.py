@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.urls import reverse 
 from django.http import (HttpResponse, HttpResponseRedirect, 
 						HttpResponseNotAllowed)
+from .models import Deck, Player, Match
 import re
 
 # globals
