@@ -152,7 +152,9 @@ def updatedCollection(request):
 	#print(f'Escaped code is {escape(request.GET["code"])}')
 	#print(f'Escaped code is {escape(request.GET["state"])}')
 	#print(request.build_absolute_uri())
-	if request.user.profile.refreshToken:
+	
+	if request.user.profile.refreshToken == "":
+		print("no refreshToken")
 		state = request.user.profile.state
 		oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE, state=state)
 		authorization_response = request.build_absolute_uri()
