@@ -192,7 +192,7 @@ def authorizeHSRAccess(request):
 
 def refreshHSRAccess(request):
 	# set up OAuth2 Session
-	token = user.profile.token
+	token = request.user.profile.token
 	oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE, token=token)
 	authorization_url, state = oauth.authorization_url(HSR_AUTHORIZATION_URL)
 	clientInfo = {'client_id': CLIENT_ID, 'client_secret': CLIENT_SECRET}
