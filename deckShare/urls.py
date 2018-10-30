@@ -10,5 +10,6 @@ urlpatterns = [
     path("register", views.register, name="register"),
     path("registered", views.registered, name="registered"),
     path("profile", views.profile, name="profile"),
+    path("profile/updateCollection", views.updateCollection, name="updateCollection"),
     path("wishList", views.wishList, name="wishList"),
 ]
