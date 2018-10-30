@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function(event) {
 	document.querySelector('.updateCollection').onclick = function() {
-		location.href="/UpdateCollection"
+		location.href="profile/UpdateCollection"
 	}
 
 });
