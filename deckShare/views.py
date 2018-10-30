@@ -179,8 +179,7 @@ def getUserData(request, oauth):
 	# Save relevent user data
 	profile = request.user.profile
 	profile.blizzTag = userData["battletag"]
-	profile.refreshToken = token["refresh_token"]
-	profile.token = token
+	profile.token = oauth.token
 	profile.collection = collection
 	request.user.save()
 
