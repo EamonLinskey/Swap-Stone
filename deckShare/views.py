@@ -152,7 +152,7 @@ def updatedCollection(request):
 	#print(f'Escaped code is {escape(request.GET["code"])}')
 	#print(f'Escaped code is {escape(request.GET["state"])}')
 	#print(request.build_absolute_uri())
-	if user.profile.refreshToken:
+	if request.user.profile.refreshToken:
 		state = request.user.profile.state
 		oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE, state=state)
 		authorization_response = request.build_absolute_uri()
@@ -210,6 +210,4 @@ def updateCollection(request):
 		return redirect(authorization_url)
 	return render(request, "deckShare/updatedCollection.html")
 	
-
-
 
