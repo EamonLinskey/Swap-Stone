@@ -205,7 +205,7 @@ def refreshHSRAccess(request):
 
 @login_required
 def updateCollection(request):
-	print(f'the token is: {request.user.profile.refreshToken == None}')
+	print(f'the token is: {request.user.profile.token == None}')
 	if request.user.profile.token is None:
 		authorization_url, state = authorizeHSRAccess(request)
 		request.user.profile.state = state
