@@ -140,3 +140,9 @@ def wishList(request):
 		return render(request, "deckShare/wishList.html", {"wishList": wishList})
 	else:
 		return HttpResponseRedirect(reverse("index"))
+
+def updateCollection(request):
+	if request.user.is_authenticated:
+		return render(request, "deckShare/updateCollection.html")
+	else:
+		return HttpResponseRedirect(reverse("index"))
