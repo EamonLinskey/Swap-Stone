@@ -209,6 +209,8 @@ def updateCollection(request):
 		request.user.profile.state = state
 		request.user.save()
 		return redirect(authorization_url)
-	return render(request, "deckShare/updatedCollection.html")
+	else:
+		refreshHSRAccess(request)
+		return render(request, "deckShare/updatedCollection.html")
 	
 
