@@ -15,9 +15,9 @@ class Profile(models.Model):
 	blizzTag = models.CharField(max_length=100, blank=True)
 	wishList = models.ManyToManyField(Deck, blank=True)
 	matches = models.ManyToManyField('Match', blank=True)
-	refreshToken = models.CharField(max_length=100, blank=True)
 	state = models.CharField(max_length=100, blank=True)
 	token = JSONField(blank=True, null=True)
+	lastUpdateCollection = models.CharField(max_length=100, blank=True)
 	collection = JSONField(blank=True, null=True)
 
 @receiver(post_save, sender=User)

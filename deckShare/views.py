@@ -10,6 +10,7 @@ from requests_oauthlib import OAuth2Session
 from .models import Deck, Profile, Match
 import re
 import os
+import datetime
 
 # globals
 DECK_SIZE = 30
@@ -181,6 +182,7 @@ def getUserData(request, oauth):
 	profile.blizzTag = userData["battletag"]
 	profile.token = oauth.token
 	profile.collection = collection
+	profile.lastUpdateCollection = str(datetime.datetime.now())
 	request.user.save()
 
 def authorizeHSRAccess(request):
