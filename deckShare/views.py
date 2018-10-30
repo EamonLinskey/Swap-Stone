@@ -1,14 +1,19 @@
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from django.urls import reverse 
 from django.http import (HttpResponse, HttpResponseRedirect, 
 						HttpResponseNotAllowed)
-from .models import Deck, Player, Match
+from .models import Deck, Profile, Match
 import re
+import os
 
 # globals
 DECK_SIZE = 30
+CLIENT_ID = os.getenv('CLIENT_ID')
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+REDIRECT_URI = os.getenv('REDIRECT_URI')
 
 def validate_deck_code(deckString, FULL_COLLECTION):
     # Makes sure deckstring is syntactically valid
@@ -42,11 +47,9 @@ def validate_deck_code(deckString, FULL_COLLECTION):
 def index(request):
 	return render(request, "deckShare/index.html")
 
+@login_required
 def profile(request):
-	if request.user.is_authenticated:
-		return render(request, "deckShare/profile.html")
-	else:
-		return HttpResponseRedirect(reverse("signIn"))
+	return render(request, "deckShare/profile.html")
 
 def signIn(request):
 	if request.user.is_authenticated:
@@ -132,17 +135,17 @@ def registered(request):
 	else:
 		return HttpResponseRedirect(reverse("index"))
 
-
+@login_required
 def wishList(request):
-	if request.user.is_authenticated:
-		wishList = Player.objects.get(blizzTag="Linsk#123").wishList.all()
-		
-		return render(request, "deckShare/wishList.html", {"wishList": wishList})
-	else:
-		return HttpResponseRedirect(reverse("index"))
+	wishList = Player.objects.get(blizzTag="Linsk#123").wishList.all()
+	return render(request, "deckShare/wishList.html", {"wishList": wishList})
 
+@login_required
+def updatedCollection(request):
+	return render(request, "deckShare/updatedCollection.html")
+
+@login_required
 def updateCollection(request):
-	if request.user.is_authenticated:
-		return render(request, "deckShare/updateCollection.html")
-	else:
-		return HttpResponseRedirect(reverse("index"))
+	print(user)
+	return 
+	

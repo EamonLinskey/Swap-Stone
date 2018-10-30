@@ -19,7 +19,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'abcdefghijklmnopqrstuvwxyz123456789')
+SECRET_KEY = os.getenv('SECRET_KEY', "abcdefghijklmnopqrstuvwxyz123456789")
+
+LOGIN_URL = '/signIn'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
