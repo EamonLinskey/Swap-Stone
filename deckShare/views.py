@@ -1,10 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse 
 from django.http import (HttpResponse, HttpResponseRedirect, 
 						HttpResponseNotAllowed)
+from django.utils.html import escape
+from requests_oauthlib import OAuth2Session
 from .models import Deck, Profile, Match
 import re
 import os
@@ -14,6 +16,10 @@ DECK_SIZE = 30
 CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 REDIRECT_URI = os.getenv('REDIRECT_URI')
+SCOPE = ['collection:read']
+HSR_AUTHORIZATION_URL = 'https://hsreplay.net/oauth2/authorize/'
+HSR_TOKEN_URL = 'https://hsreplay.net/oauth2/token/'
+HSR_ACCOUNT_URL = 'https://hsreplay.net/api/v1/account/'
 
 def validate_deck_code(deckString, FULL_COLLECTION):
     # Makes sure deckstring is syntactically valid
@@ -142,10 +148,68 @@ def wishList(request):
 
 @login_required
 def updatedCollection(request):
+	# May be overkill to escape here but potentially prevents malicious injections
+	#print(f'Escaped code is {escape(request.GET["code"])}')
+	#print(f'Escaped code is {escape(request.GET["state"])}')
+	#print(request.build_absolute_uri())
+	if user.profile.refreshToken:
+		state = request.user.profile.state
+		oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE, state=state)
+		authorization_response = request.build_absolute_uri()
+		token = oauth.fetch_token(
+	        	HSR_TOKEN_URL,
+	        	authorization_response=authorization_response)
+		getUserData(request, oauth)
+	else:
+		refreshHSRAccess(request)
 	return render(request, "deckShare/updatedCollection.html")
+
+
+def getUserData(request, oauth):
+	# Get user data
+	userData = oauth.get(HSR_ACCOUNT_URL).json()
+	accountHi, accountLo = userData["blizzard_accounts"][0]["account_hi"],userData["blizzard_accounts"][0]["account_lo"]
+	
+	# Fetch collection
+	collectionUrl = f"https://api.hsreplay.net/v1/collection/?account_hi={accountHi}&account_lo={accountLo}"
+	collection = oauth.get(collectionUrl).json()
+
+	# Save relevent user data
+	profile = request.user.profile
+	profile.blizzTag = userData["battletag"]
+	profile.refreshToken = token["refresh_token"]
+	profile.token = token
+	profile.collection = collection
+	request.user.save()
+
+def authorizeHSRAccess(request):
+	# set up OAuth2 Session
+	oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE)
+	authorization_url, state = oauth.authorization_url(HSR_AUTHORIZATION_URL)
+
+	# redirect to HSreplay for authorization
+	return authorization_url, state
+
+def refreshHSRAccess(request):
+	# set up OAuth2 Session
+	token = user.profile.token
+	oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE, token=token)
+	authorization_url, state = oauth.authorization_url(HSR_AUTHORIZATION_URL)
+	clientInfo = {'client_id': CLIENT_ID, 'client_secret': CLIENT_SECRET}
+	token = oauth.refresh_token(HSR_TOKEN_URL, **clientInfo)
+	getUserData(request, oauth)
+
 
 @login_required
 def updateCollection(request):
-	print(user)
-	return 
+	print(f'the token is: {request.user.profile.refreshToken == ""}')
+	if request.user.profile.token == "":
+		authorization_url, state = authorizeHSRAccess(request)
+		request.user.profile.state = state
+		request.user.save()
+		return redirect(authorization_url)
+	return render(request, "deckShare/updatedCollection.html")
 	
+
+
+
