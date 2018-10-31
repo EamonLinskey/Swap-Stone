@@ -3,4 +3,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		location.href="profile/updateCollection"
 	}
 
+	document.querySelector('.wishList').onclick = function() {
+		location.href="profile/wishList"
+	}
+
 });
