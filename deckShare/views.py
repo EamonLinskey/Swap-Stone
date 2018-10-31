@@ -219,7 +219,7 @@ def updateCollection(request):
 		request.user.save()
 		return redirect(authorization_url)
 	else:
-		refreshHSRAccess(request)
+		return refreshHSRAccess(request)
 		
 	
 
