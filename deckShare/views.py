@@ -202,9 +202,10 @@ def refreshHSRAccess(request):
 	try:
 		token = oauth.refresh_token(HSR_TOKEN_URL, **clientInfo)
 		getUserData(request, oauth)
+		return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
 	except:
 		authorization_url, state = authorizeHSRAccess(request)
-		request.user.profile.state = "here i go excepting again"
+		request.user.profile.state = state
 		request.user.save()
 		return redirect(authorization_url)
 
@@ -219,6 +220,6 @@ def updateCollection(request):
 		return redirect(authorization_url)
 	else:
 		refreshHSRAccess(request)
-		return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
+		
 	
 
