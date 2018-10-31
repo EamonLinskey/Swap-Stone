@@ -174,7 +174,7 @@ def loadedCollection(request):
 		getUserData(request, oauth)
 		return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
 	except:
-		return render(request, "deckShare/updatedCollection.html", {"message": "There was an error. Swap-stone must have permission to view your collection"})
+		return render(request, "deckShare/updatedCollection.html", {"message": "There was an error."})
 
 def getUserData(request, oauth):
 	# Get user data
@@ -189,7 +189,7 @@ def getUserData(request, oauth):
 	profile = request.user.profile
 	profile.blizzTag = userData["battletag"]
 	profile.token = oauth.token
-	profile.collection = collection
+	profile.collection = collection["collection"]
 	profile.lastUpdateCollection = str(datetime.datetime.now())
 	profile.time = time.time()
 	request.user.save()
