@@ -15,6 +15,7 @@ import time
 
 # globals
 DECK_SIZE = 30
+API_TIMEOUT_SECS = 120
 CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 REDIRECT_URI = os.getenv('REDIRECT_URI')
@@ -156,10 +157,10 @@ def updatedCollection(request):
 	#print(request.build_absolute_uri())
 	#return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
 	timeDiff = int(time.time()) - int(request.user.profile.time)
-	if timeDiff > 120.0:
+	if timeDiff > API_TIMEOUT_SECS:
 		return refreshHSRAccess(request)
 	else:
-		return render(request, "deckShare/updatedCollection.html", {"message": f"You recently updated your collection. Please wait {timeDiff} seconds before trying again"})
+		return render(request, "deckShare/updatedCollection.html", {"message": f"You recently updated your collection. Please wait {API_TIMEOUT_SECS - timeDiff} seconds before trying again"})
 
 @login_required
 def loadedCollection(request):
@@ -221,12 +222,12 @@ def refreshHSRAccess(request):
 @login_required
 def updateCollection(request):
 	timeDiff = int(time.time()) - int(request.user.profile.time)
-	if timeDiff > 120.0:
+	if timeDiff > API_TIMEOUT_SECS:
 		if request.user.profile.token is None:
 			return authorizeHSRAccess(request)
 		else:
 			return refreshHSRAccess(request)
 	else:
-		return render(request, "deckShare/updatedCollection.html", {"message": f"You recently updated your collection. Please wait {timeDiff} seconds before trying again"})
+		return render(request, "deckShare/updatedCollection.html", {"message": f"You recently updated your collection. Please wait {API_TIMEOUT_SECS - timeDiff} seconds before trying again"})
 	
 
