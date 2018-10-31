@@ -57,9 +57,20 @@
 }
 
 .profile-links-header{
-    font-size: 32px;
+    font-size: 6vh;
 }
 
 .profile-links-text{
+    font-size: 2.5vh;
     margin-left: 1%
+}
+
+/* For WishList*/
+.deckName{
+    width: 10vw;
+}
+
+.deckCode{
+    width: 60vw;
+}
 }

@@ -7,11 +7,15 @@ from django.http import (HttpResponse, HttpResponseRedirect,
 						HttpResponseNotAllowed)
 from django.utils.html import escape
 from requests_oauthlib import OAuth2Session
+from hearthstone.deckstrings import Deck as DeckHearth
+from hearthstone.enums import FormatType
 from .models import Deck, Profile, Match
 import re
 import os
 import datetime
 import time
+import json
+import requests
 
 # globals
 DECK_SIZE = 30
@@ -23,31 +27,68 @@ SCOPE = ['collection:read']
 HSR_AUTHORIZATION_URL = 'https://hsreplay.net/oauth2/authorize/'
 HSR_TOKEN_URL = 'https://hsreplay.net/oauth2/token/'
 HSR_ACCOUNT_URL = 'https://hsreplay.net/api/v1/account/'
+#CLASSES = {heroes}
 
-def validate_deck_code(deckString, FULL_COLLECTION):
+# Used to make teh full colllection json file locally
+# should only be run when new cards are added to update file
+def makeFullCollFile(fileName):
+	# Update to the version number corresponing to the most recent release
+	version = "25770"
+
+	dataResponse = requests.get(f"https://api.hearthstonejson.com/v1/{version}/enUS/cards.collectible.json")
+	fullCollectionRaw = json.loads(dataResponse.text)
+    
+	with open(fileName, 'w') as outfile:
+		json.dump(fullCollectionRaw, outfile)
+
+# Builds a dictionary of all cards from the hearthstone json file with their classes and names by ids
+def buildFullColl(datafile):
+    
+    # Read the API json file of cards
+    f = open(datafile, "r")
+    fullCollectionRaw = json.loads(f.read())
+    
+    # The API for some reason strores the Heros as cards but for my purposes they should not be included
+    # so I filtered them into a differernt dict
+    fullCollectionClean = {}
+    heroes = {}
+    for card in fullCollectionRaw:
+        if card['id'][0:4] != "HERO":
+            fullCollectionClean[card['dbfId']] = {'name': card['name'],'class': card['cardClass']}
+        else:
+            heroes[card['dbfId']] = {'name': card['name'],'class': card['cardClass']}
+    return fullCollectionClean, heroes
+
+def IsValidDeckCode(deckString):
     # Makes sure deckstring is syntactically valid
-    try:
-        deck = Deck.from_deckstring(deckString)
-    except:
-        return False
+	try:
+		deck = DeckHearth.from_deckstring(deckString)
+		#print(deck.cards)
+	except:
+		#print("false 1")
+		return False
     
     # Checks if deck length is equal to the Standard Hearthstone decklength
-    if sum([int(cardNum) for _,cardNum in deck.cards]) != DECK_SIZE:
-        return False
+	if sum([int(cardNum) for _,cardNum in deck.cards]) != DECK_SIZE:
+		#print("false 2")
+		return False
 
     # Checks if each "card" corresponds to an actual Hearthstone card
-    classes = []
-    for cardId,_ in deck.cards:
-        if cardId not in FULL_COLLECTION:
-            return False
-        # creates a list of classes used to make a deck
-        if FULL_COLLECTION[cardId]["class"] not in classes and FULL_COLLECTION[cardId]["class"] != "NEUTRAL":
-            classes += [COLLECTION_CLASSES[cardId]]
+	classes = []
+	for cardId,_ in deck.cards:
+		if cardId not in FULL_COLLECTION:
+			#print("false 3")
+			#print(cardId)
+			return False
+		# creates a list of classes used to make a deck
+		if FULL_COLLECTION[cardId]["class"] not in classes and FULL_COLLECTION[cardId]["class"] != "NEUTRAL":
+			classes += [FULL_COLLECTION[cardId]["class"]]
     
-    # Makes sure only one class (and neutrals) can be in a deck (It can also be all neutrals)
-    if len(classes) <= 1:
-        return True
-    return False
+	# Makes sure only one class (and neutrals) can be in a deck (It can also be all neutrals)
+	if len(classes) <= 1:
+		return True
+	#print("false 4")
+	return False
 
 # Returns time diffrenece from last update in seconds
 def timeDiff():
@@ -102,6 +143,9 @@ def refreshHSRAccess(request):
 		# If access was revoked this tries to reauthorize
 		return authorizeHSRAccess(request)
 
+# More globals that require a function to be set
+FULL_COLLECTION, HEROES = buildFullColl('static/deckShare/json/FullCollection.json')
+#print(FULL_COLLECTION)
 
 # Create your views here.
 def index(request):
@@ -197,8 +241,34 @@ def registered(request):
 
 @login_required
 def wishList(request):
-	wishList = request.user.profile.wishList.all()
-	return render(request, "deckShare/wishList.html", {"wishList": wishList})
+	deckName = deckCode = message = ""
+	print("post is ")
+	print(request.POST)
+	try:
+		deckName, deckCode = escape(request.POST.get("deckName")), escape(request.POST.get("deckCode"))
+		print(deckName, deckCode)
+		if IsValidDeckCode(deckCode):
+			if len(deckName) > 50 or len(deckName) < 0:
+				message = "Your deck Name must be less than 50 characters and cannot be blank"
+			else:
+				wishList = request.user.profile.wishList.all()
+				if len(wishList.filter(deckString=deckCode)) == 0:
+					deckObj = DeckHearth.from_deckstring(deckCode)
+					heroId = deckObj.heroes[0]
+					deckClass = HEROES[heroId]["class"]
+					deck = Deck.objects.createDeck(deckName, deckCode, deckClass)
+					deck.save()	
+					request.user.profile.wishList.add(deck)
+					request.user.save()
+					deckName = deckCode = ""
+				else:
+					message = "You already have added this code"
+		else:
+			message = "Your deck code is not valid"
+	finally:
+		
+		wishList = request.user.profile.wishList.all()
+		return render(request, "deckShare/wishList.html", {"wishList": wishList, "message": message, "deckCode":deckCode,  "deckName":deckName})
 
 @login_required
 def updatedCollection(request):

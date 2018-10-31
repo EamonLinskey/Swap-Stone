@@ -5,10 +5,16 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 # Create your models here.
+class DeckManager(models.Manager):
+    def createDeck(self, name, deckString, deckClass):
+        deck = self.create(name=name, deckString=deckString, deckClass=deckClass)
+        return deck
+
 class Deck(models.Model):
 	name = models.CharField(max_length=50)
 	deckString = models.CharField(max_length=200)
 	deckClass = models.CharField(max_length=20)
+	objects = DeckManager()
 
 class Profile(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE)

@@ -4,3 +4,4 @@ whitenoise
 requests 
 requests_oauthlib
 django-heroku
+hearthstone
