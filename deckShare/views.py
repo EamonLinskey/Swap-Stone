@@ -155,7 +155,7 @@ def updatedCollection(request):
 	#print(f'Escaped code is {escape(request.GET["state"])}')
 	#print(request.build_absolute_uri())
 	#return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
-	timeDiff = time.time - request.user.profile.time
+	timeDiff = int(time.time) - int(request.user.profile.time)
 	if timeDiff > 120.0:
 		return refreshHSRAccess(request)
 	else:
@@ -220,7 +220,7 @@ def refreshHSRAccess(request):
 
 @login_required
 def updateCollection(request):
-	timeDiff = time.time - request.user.profile.time
+	timeDiff = int(time.time) - int(request.user.profile.time)
 	if timeDiff > 120.0:
 		if request.user.profile.token is None:
 			return authorizeHSRAccess(request)
