@@ -153,18 +153,18 @@ def updatedCollection(request):
 	#print(f'Escaped code is {escape(request.GET["code"])}')
 	#print(f'Escaped code is {escape(request.GET["state"])}')
 	#print(request.build_absolute_uri())
-	
-	if request.user.profile.token is None:
-		print("no refreshToken")
-		state = request.user.profile.state
-		oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE, state=state)
-		authorization_response = request.build_absolute_uri()
-		token = oauth.fetch_token(
+	return refreshHSRAccess(request)
+	#return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
+
+@login_required
+def loadedCollection(request):
+	state = request.user.profile.state
+	oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE, state=state)
+	authorization_response = request.build_absolute_uri()
+	token = oauth.fetch_token(
 	        	HSR_TOKEN_URL,
 	        	authorization_response=authorization_response)
-		getUserData(request, oauth)
-	else:
-		refreshHSRAccess(request)
+	getUserData(request, oauth)
 	return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
 
 
@@ -190,8 +190,11 @@ def authorizeHSRAccess(request):
 	oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE)
 	authorization_url, state = oauth.authorization_url(HSR_AUTHORIZATION_URL)
 
-	# redirect to HSreplay for authorization
-	return authorization_url, state
+	request.user.profile.state = state
+	request.user.save()
+
+	return redirect(authorization_url)
+	
 
 def refreshHSRAccess(request):
 	# set up OAuth2 Session
@@ -204,20 +207,14 @@ def refreshHSRAccess(request):
 		getUserData(request, oauth)
 		return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
 	except:
-		authorization_url, state = authorizeHSRAccess(request)
-		request.user.profile.state = state
-		request.user.save()
-		return redirect(authorization_url)
+		return authorizeHSRAccess(request)
 
 
 @login_required
 def updateCollection(request):
 	print(f'the token is: {request.user.profile.token == None}')
 	if request.user.profile.token is None:
-		authorization_url, state = authorizeHSRAccess(request)
-		request.user.profile.state = state
-		request.user.save()
-		return redirect(authorization_url)
+		return authorizeHSRAccess(request)
 	else:
 		return refreshHSRAccess(request)
 		
