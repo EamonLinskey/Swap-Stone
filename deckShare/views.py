@@ -11,6 +11,7 @@ from .models import Deck, Profile, Match
 import re
 import os
 import datetime
+import time
 
 # globals
 DECK_SIZE = 30
@@ -153,8 +154,12 @@ def updatedCollection(request):
 	#print(f'Escaped code is {escape(request.GET["code"])}')
 	#print(f'Escaped code is {escape(request.GET["state"])}')
 	#print(request.build_absolute_uri())
-	return refreshHSRAccess(request)
 	#return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
+	timeDiff = time.time - request.user.profile.time
+	if timeDiff > 120.0:
+		return refreshHSRAccess(request)
+	else:
+		return render(request, "deckShare/updatedCollection.html", {"message": f"You recently updated your collection. Please wait {timeDiff} seconds before trying again"})
 
 @login_required
 def loadedCollection(request):
@@ -185,6 +190,7 @@ def getUserData(request, oauth):
 	profile.token = oauth.token
 	profile.collection = collection
 	profile.lastUpdateCollection = str(datetime.datetime.now())
+	profile.time = time.time()
 	request.user.save()
 
 def authorizeHSRAccess(request):
@@ -214,11 +220,13 @@ def refreshHSRAccess(request):
 
 @login_required
 def updateCollection(request):
-	print(f'the token is: {request.user.profile.token == None}')
-	if request.user.profile.token is None:
-		return authorizeHSRAccess(request)
+	timeDiff = time.time - request.user.profile.time
+	if timeDiff > 120.0:
+		if request.user.profile.token is None:
+			return authorizeHSRAccess(request)
+		else:
+			return refreshHSRAccess(request)
 	else:
-		return refreshHSRAccess(request)
-		
+		return render(request, "deckShare/updatedCollection.html", {"message": f"You recently updated your collection. Please wait {timeDiff} seconds before trying again"})
 	
 

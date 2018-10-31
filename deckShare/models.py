@@ -18,6 +18,7 @@ class Profile(models.Model):
 	state = models.CharField(max_length=100, blank=True)
 	token = JSONField(blank=True, null=True)
 	lastUpdateCollection = models.CharField(max_length=100, blank=True)
+	time = models.FloatField(blank=True)
 	collection = JSONField(blank=True, null=True)
 
 @receiver(post_save, sender=User)
