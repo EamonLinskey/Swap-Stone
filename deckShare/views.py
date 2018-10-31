@@ -204,7 +204,7 @@ def refreshHSRAccess(request):
 		getUserData(request, oauth)
 	except:
 		authorization_url, state = authorizeHSRAccess(request)
-		request.user.profile.state = state
+		request.user.profile.state = "here i go excepting again"
 		request.user.save()
 		return redirect(authorization_url)
 
