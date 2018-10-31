@@ -49,7 +49,58 @@ def validate_deck_code(deckString, FULL_COLLECTION):
         return True
     return False
 
+# Returns time diffrenece from last update in seconds
+def timeDiff():
+	return int(time.time()) - int(request.user.profile.time)
 
+def getUserData(request, oauth):
+	# Get user data
+	userData = oauth.get(HSR_ACCOUNT_URL).json()
+	accountInfo = userData["blizzard_accounts"][0]
+	accountHi, accountLo = accountInfo["account_hi"],accountInfo["account_lo"]
+	
+	# Fetch collection
+	collectionUrl = f"https://api.hsreplay.net/v1/collection/?account_hi={accountHi}&account_lo={accountLo}"
+	collection = oauth.get(collectionUrl).json()
+
+	# Save relevent user data
+	profile = request.user.profile
+	profile.blizzTag = userData["battletag"]
+	profile.token = oauth.token
+	profile.collection = collection["collection"]
+	profile.lastUpdateCollection = str(datetime.datetime.now())
+	profile.time = time.time()
+	request.user.save()
+
+def authorizeHSRAccess(request):
+	# set up OAuth2 Session
+	oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE)
+	authorization_url, state = oauth.authorization_url(HSR_AUTHORIZATION_URL)
+
+	# Save state for validation later
+	request.user.profile.state = state
+	request.user.save()
+
+	# rediredct to HSReplay for authorization
+	return redirect(authorization_url)
+	
+
+def refreshHSRAccess(request):
+	# set up OAuth2 Session
+	token = request.user.profile.token
+	oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE, 
+							token=token)
+	authorization_url, state = oauth.authorization_url(HSR_AUTHORIZATION_URL)
+	clientInfo = {'client_id': CLIENT_ID, 'client_secret': CLIENT_SECRET}
+	
+	try:
+		# Update collection with new token
+		token = oauth.refresh_token(HSR_TOKEN_URL, **clientInfo)
+		getUserData(request, oauth)
+		return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
+	except:
+		# If access was revoked this tries to reauthorize
+		return authorizeHSRAccess(request)
 
 
 # Create your views here.
@@ -146,21 +197,16 @@ def registered(request):
 
 @login_required
 def wishList(request):
-	wishList = Player.objects.get(blizzTag="Linsk#123").wishList.all()
+	wishList = request.user.profile.wishList.all()
 	return render(request, "deckShare/wishList.html", {"wishList": wishList})
 
 @login_required
 def updatedCollection(request):
-	# May be overkill to escape here but potentially prevents malicious injections
-	#print(f'Escaped code is {escape(request.GET["code"])}')
-	#print(f'Escaped code is {escape(request.GET["state"])}')
-	#print(request.build_absolute_uri())
-	#return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
-	timeDiff = int(time.time()) - int(request.user.profile.time)
-	if timeDiff > API_TIMEOUT_SECS:
+	if timeDiff() > API_TIMEOUT_SECS:
 		return refreshHSRAccess(request)
 	else:
-		return render(request, "deckShare/updatedCollection.html", {"message": f"You recently updated your collection. Please wait {API_TIMEOUT_SECS - timeDiff} seconds before trying again"})
+		return render(request, "deckShare/updatedCollection.html", 
+						{"message": f"You recently updated your collection. Please wait {API_TIMEOUT_SECS - timeDiff()} seconds before trying again"})
 
 @login_required
 def loadedCollection(request):
@@ -176,58 +222,14 @@ def loadedCollection(request):
 	except:
 		return render(request, "deckShare/updatedCollection.html", {"message": "There was an error."})
 
-def getUserData(request, oauth):
-	# Get user data
-	userData = oauth.get(HSR_ACCOUNT_URL).json()
-	accountHi, accountLo = userData["blizzard_accounts"][0]["account_hi"],userData["blizzard_accounts"][0]["account_lo"]
-	
-	# Fetch collection
-	collectionUrl = f"https://api.hsreplay.net/v1/collection/?account_hi={accountHi}&account_lo={accountLo}"
-	collection = oauth.get(collectionUrl).json()
-
-	# Save relevent user data
-	profile = request.user.profile
-	profile.blizzTag = userData["battletag"]
-	profile.token = oauth.token
-	profile.collection = collection["collection"]
-	profile.lastUpdateCollection = str(datetime.datetime.now())
-	profile.time = time.time()
-	request.user.save()
-
-def authorizeHSRAccess(request):
-	# set up OAuth2 Session
-	oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE)
-	authorization_url, state = oauth.authorization_url(HSR_AUTHORIZATION_URL)
-
-	request.user.profile.state = state
-	request.user.save()
-
-	return redirect(authorization_url)
-	
-
-def refreshHSRAccess(request):
-	# set up OAuth2 Session
-	token = request.user.profile.token
-	oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE, token=token)
-	authorization_url, state = oauth.authorization_url(HSR_AUTHORIZATION_URL)
-	clientInfo = {'client_id': CLIENT_ID, 'client_secret': CLIENT_SECRET}
-	try:
-		token = oauth.refresh_token(HSR_TOKEN_URL, **clientInfo)
-		getUserData(request, oauth)
-		return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
-	except:
-		return authorizeHSRAccess(request)
-
-
 @login_required
 def updateCollection(request):
-	timeDiff = int(time.time()) - int(request.user.profile.time)
-	if timeDiff > API_TIMEOUT_SECS:
+	if timeDiff() > API_TIMEOUT_SECS:
 		if request.user.profile.token is None:
 			return authorizeHSRAccess(request)
 		else:
 			return refreshHSRAccess(request)
 	else:
-		return render(request, "deckShare/updatedCollection.html", {"message": f"You recently updated your collection. Please wait {API_TIMEOUT_SECS - timeDiff} seconds before trying again"})
+		return render(request, "deckShare/updatedCollection.html", {"message": f"You recently updated your collection. Please wait {API_TIMEOUT_SECS - timeDiff()} seconds before trying again"})
 	
 
