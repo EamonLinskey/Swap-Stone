@@ -199,9 +199,15 @@ def refreshHSRAccess(request):
 	oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE, token=token)
 	authorization_url, state = oauth.authorization_url(HSR_AUTHORIZATION_URL)
 	clientInfo = {'client_id': CLIENT_ID, 'client_secret': CLIENT_SECRET}
-	token = oauth.refresh_token(HSR_TOKEN_URL, **clientInfo)
-	getUserData(request, oauth)
-
+	try:
+		token = oauth.refresh_token(HSR_TOKEN_URL, **clientInfo)
+		getUserData(request, oauth)
+	except:
+		authorization_url, state = authorizeHSRAccess(request)
+		request.user.profile.state = state
+		request.user.save()
+		return redirect(authorization_url)
+		
 
 @login_required
 def updateCollection(request):
