@@ -165,7 +165,7 @@ def updatedCollection(request):
 		getUserData(request, oauth)
 	else:
 		refreshHSRAccess(request)
-	return render(request, "deckShare/updatedCollection.html")
+	return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
 
 
 def getUserData(request, oauth):
@@ -207,7 +207,7 @@ def refreshHSRAccess(request):
 		request.user.profile.state = state
 		request.user.save()
 		return redirect(authorization_url)
-		
+
 
 @login_required
 def updateCollection(request):
@@ -219,6 +219,6 @@ def updateCollection(request):
 		return redirect(authorization_url)
 	else:
 		refreshHSRAccess(request)
-		return render(request, "deckShare/updatedCollection.html")
+		return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
 	
 
