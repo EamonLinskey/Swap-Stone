@@ -98,6 +98,8 @@ def isMakable(deck, profile):
 		print(deckObj)
 		for cardId,count in deckObj.cards:
 			print("1")
+			print(cardId)
+			print(profile.collection)
 			if cardId in profile.collection:
 				print("2")
 				if sum(profile.collection[cardId]) <= count:
