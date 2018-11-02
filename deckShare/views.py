@@ -351,6 +351,8 @@ def generous(request):
 	generous = []
 	for deck in Deck.objects.all():
 		profile = request.user.profile
+		generous.append(f"the profile is {profile}")
+		generous.append(f"the deck owner is {deck.owner}")
 		if deck.owner != profile:
 			if isMakable(deck, request.user.profile):
 				generous.append(match)
