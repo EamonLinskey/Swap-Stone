@@ -2,7 +2,7 @@
 
 {% block body %}
 {% load static %}
-<script src= "{% static "deckShare/scripts/profile-links.js" %}"></script>
+<script src= "{% static "deckShare/scripts/wishList.js" %}"></script>
 <script></script>
 <div class="background-containter">
 	<div class="heading">Well Met, {{user.username}}</div>
@@ -17,12 +17,19 @@
 			</form>
 		</div>
 
+		<!-- Hidden form to submit deck to remove from Wishlist -->
+		<form id="deleteForm" action="/profile/wishList" method="post">
+			{% csrf_token %}
+			<input type="hidden" id="deckToDelete" name="deckToDelete" value="">
+		</form>
+
 		<table class="table table-striped">
 			<thead>
 				<tr>
 					<th scope="col">Name</th>
 					<th scope="col">Class</th>
 					<th scope="col">Deck Code</th>
+					<th scope="col">Delete</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -31,6 +38,7 @@
 					<td>{{deck.name}}</td>
 					<td>{{deck.deckClass}}</td>
 					<td>{{deck.deckString}}</td>
+					<td><img class="trash" id="{{deck.id}}" src={% static "deckShare/images/trash.png" %} alt="Delete"></td>
 				</tr>
 				{% endfor %}
 			</tbody>

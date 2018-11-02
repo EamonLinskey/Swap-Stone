@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse 
 from django.http import (HttpResponse, HttpResponseRedirect, 
-						HttpResponseNotAllowed)
+						HttpResponseNotAllowed, HttpRequest)
 from django.utils.html import escape
 from requests_oauthlib import OAuth2Session
 from hearthstone.deckstrings import Deck as DeckHearth
@@ -91,7 +91,7 @@ def IsValidDeckCode(deckString):
 	return False
 
 # Returns time diffrenece from last update in seconds
-def timeDiff():
+def timeDiff(request):
 	return int(time.time()) - int(request.user.profile.time)
 
 def getUserData(request, oauth):
@@ -153,7 +153,8 @@ def index(request):
 
 @login_required
 def profile(request):
-	return render(request, "deckShare/profile.html")
+	print(f"the wish list is {request.user.profile.wishList.all()}")
+	return render(request, "deckShare/profile.html", {"numDecks": len(request.user.profile.wishList.all())})
 
 def signIn(request):
 	if request.user.is_authenticated:
@@ -241,42 +242,60 @@ def registered(request):
 
 @login_required
 def wishList(request):
-	deckName = deckCode = message = ""
-	print("post is ")
-	print(request.POST)
-	try:
+	context = {}
+
+	if 'deckToDelete' in request.POST:
+		return deleteFromWishlist(request)
+
+	if ('deckName' not in request.POST or  'deckCode' not in request.POST):
+			context["wishList"] = request.user.profile.wishList.all()
+			return render(request, "deckShare/wishList.html", context)
+	else:
 		deckName, deckCode = escape(request.POST.get("deckName")), escape(request.POST.get("deckCode"))
-		print(deckName, deckCode)
 		if IsValidDeckCode(deckCode):
 			if len(deckName) > 50 or len(deckName) < 0:
-				message = "Your deck Name must be less than 50 characters and cannot be blank"
+				context["message"] = "Your deck Name must be less than 50 characters and cannot be blank"
 			else:
 				wishList = request.user.profile.wishList.all()
 				if len(wishList.filter(deckString=deckCode)) == 0:
 					deckObj = DeckHearth.from_deckstring(deckCode)
 					heroId = deckObj.heroes[0]
 					deckClass = HEROES[heroId]["class"]
-					deck = Deck.objects.createDeck(deckName, deckCode, deckClass)
+					deck = Deck.objects.createDeck(deckName, deckCode, deckClass, request.user.profile)
 					deck.save()	
 					request.user.profile.wishList.add(deck)
 					request.user.save()
-					deckName = deckCode = ""
 				else:
-					message = "You already have added this code"
+					context["message"] = "You already have added this code"
+					context["deckCode"] = deckCode
+					context["deckName"] = deckName
 		else:
-			message = "Your deck code is not valid"
-	finally:
-		
+			context["message"] = "Your deck code is not valid"
+			context["deckCode"] = deckCode
+			context["deckName"] = deckName
+	
+	context["wishList"] = request.user.profile.wishList.all()
+	print(context)
+	return render(request, "deckShare/wishList.html", context)
+
+@login_required
+def deleteFromWishlist(request):
+	try:
+		deckId = escape(request.POST.get("deckToDelete"))
 		wishList = request.user.profile.wishList.all()
-		return render(request, "deckShare/wishList.html", {"wishList": wishList, "message": message, "deckCode":deckCode,  "deckName":deckName})
+		wishList.get(id=deckId).delete()
+		return render(request, "deckShare/wishList.html", {"wishList": wishList})
+	except:
+		message = "An error occured"
+		return render(request, "deckShare/wishList.html", {"wishList": wishList, "message": message})
 
 @login_required
 def updatedCollection(request):
-	if timeDiff() > API_TIMEOUT_SECS:
+	if timeDiff(request) > API_TIMEOUT_SECS:
 		return refreshHSRAccess(request)
 	else:
 		return render(request, "deckShare/updatedCollection.html", 
-						{"message": f"You recently updated your collection. Please wait {API_TIMEOUT_SECS - timeDiff()} seconds before trying again"})
+						{"message": f"You recently updated your collection. Please wait {API_TIMEOUT_SECS - timeDiff(request)} seconds before trying again"})
 
 @login_required
 def loadedCollection(request):
@@ -294,12 +313,15 @@ def loadedCollection(request):
 
 @login_required
 def updateCollection(request):
-	if timeDiff() > API_TIMEOUT_SECS:
+	if timeDiff(request) > API_TIMEOUT_SECS:
 		if request.user.profile.token is None:
 			return authorizeHSRAccess(request)
 		else:
 			return refreshHSRAccess(request)
 	else:
-		return render(request, "deckShare/updatedCollection.html", {"message": f"You recently updated your collection. Please wait {API_TIMEOUT_SECS - timeDiff()} seconds before trying again"})
+		return render(request, "deckShare/updatedCollection.html", {"message": f"You recently updated your collection. Please wait {API_TIMEOUT_SECS - timeDiff(request)} seconds before trying again"})
 	
-
+@login_required
+def matches(request):
+	
+	return render(request, "deckShare/updatedCollection.html")
