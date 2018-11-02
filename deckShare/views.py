@@ -253,7 +253,7 @@ def wishList(request):
 	else:
 		deckName, deckCode = escape(request.POST.get("deckName")), escape(request.POST.get("deckCode"))
 		if IsValidDeckCode(deckCode):
-			if len(deckName) > 50 or len(deckName) < 0:
+			if len(deckName) > 50 or len(deckName) <= 0:
 				context["message"] = "Your deck Name must be less than 50 characters and cannot be blank"
 			else:
 				wishList = request.user.profile.wishList.all()
@@ -323,5 +323,5 @@ def updateCollection(request):
 	
 @login_required
 def matches(request):
-	
+
 	return render(request, "deckShare/updatedCollection.html")
