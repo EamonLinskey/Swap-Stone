@@ -14,5 +14,6 @@ urlpatterns = [
     path("profile/updateCollection", views.updateCollection, name="updateCollection"),
     path("profile/loadedCollection", views.loadedCollection, name="loadedCollection"),
     path("profile/wishList", views.wishList, name="wishList"),
-    path("profile/matches", views.matches, name="matches"),
+    #path("profile/matches", views.matches, name="matches"),
+    path("profile/generous", views.generous, name="generous"),
 ]

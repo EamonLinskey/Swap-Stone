@@ -10,15 +10,26 @@ class DeckManager(models.Manager):
         deck = self.create(name=name, deckString=deckString, deckClass=deckClass, owner=owner)
         return deck
 
+class MatchManager(models.Manager):
+    def createMatch(self, deck1, deck2):
+        match = self.create(deck1=deck1, deck2=deck2)
+        return match
+
+class GenerousManager(models.Manager):
+    def createGenerous(self, deck):
+        Generous = self.create(deck=deck)
+        return Generous
+
 class Profile(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
 	blizzTag = models.CharField(max_length=100, blank=True)
 	wishList = models.ManyToManyField('Deck', blank=True)
 	matches = models.ManyToManyField('Match', blank=True)
+	generous = models.ManyToManyField('Generous', blank=True)
 	state = models.CharField(max_length=100, blank=True)
 	token = JSONField(blank=True, null=True)
 	lastUpdateCollection = models.CharField(max_length=100, blank=True)
-	time = models.FloatField(blank=True)
+	time = models.FloatField(blank=False, default = 0)
 	collection = JSONField(blank=True, null=True)
 
 
@@ -39,5 +50,11 @@ class Deck(models.Model):
 	objects = DeckManager()
 
 class Match(models.Model):
-	deck1 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="deck1")
-	deck2 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="deck2")
+	deck1 = models.ForeignKey(Deck, on_delete=models.CASCADE, related_name="deck1")
+	deck2 = models.ForeignKey(Deck, on_delete=models.CASCADE, related_name="deck2")
+	objects = MatchManager()
+
+
+class Generous(models.Model):
+	deck = models.ForeignKey(Deck, on_delete=models.CASCADE)
+	objects = GenerousManager()

@@ -90,6 +90,22 @@ def IsValidDeckCode(deckString):
 	#print("false 4")
 	return False
 
+def isMakable(deck, profile):
+	try:
+		deck = DeckHearth.from_deckstring(deckString)
+		for cardId,count in deck.cards:
+			if cardId in user.collection:
+				if sum(user.collection[cardId]) <= count:
+					return False
+			else:
+				return False
+		return True
+	except:
+		return False
+
+
+
+
 # Returns time diffrenece from last update in seconds
 def timeDiff(request):
 	return int(time.time()) - int(request.user.profile.time)
@@ -260,7 +276,7 @@ def wishList(request):
 				if len(wishList.filter(deckString=deckCode)) == 0:
 					deckObj = DeckHearth.from_deckstring(deckCode)
 					heroId = deckObj.heroes[0]
-					deckClass = HEROES[heroId]["class"]
+					deckClass = HEROES[heroId]["class"].capitalize()
 					deck = Deck.objects.createDeck(deckName, deckCode, deckClass, request.user.profile)
 					deck.save()	
 					request.user.profile.wishList.add(deck)
@@ -321,7 +337,21 @@ def updateCollection(request):
 	else:
 		return render(request, "deckShare/updatedCollection.html", {"message": f"You recently updated your collection. Please wait {API_TIMEOUT_SECS - timeDiff(request)} seconds before trying again"})
 	
-@login_required
-def matches(request):
+# @login_required
+# def matches(request):
+# 	for deck in Deck.objects.all():
+# 		if deck.owner != request.user.profile:
+# 			if isMakable(deck, request.user.profile):
+# 				match = Match.createMatch()
 
-	return render(request, "deckShare/updatedCollection.html")
+# 	return render(request, "deckShare/updatedCollection.html", {"matches": matches.objects.all()})
+
+@login_required
+def generous(request):
+	generous = []
+	for deck in Deck.objects.all():
+		profile = request.user.profile
+		if deck.owner != profile:
+			if isMakable(deck, request.user.profile):
+				generous.append(match)
+	return render(request, "deckShare/generous.html", {"generous": generous})

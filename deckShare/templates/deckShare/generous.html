@@ -8,17 +8,19 @@
 			<table class="table table-striped">
 			<thead>
 				<tr>
-					<th scope="col">Deck They Have</th>
-					<th scope="col">Deck You Have</th>
+					<th scope="col">Deck</th>
+					<th scope="col">Class</th>
+					<th scope="col">String</th>
 					<th scope="col">Share info?</th>
 				</tr>
 			</thead>
 			<tbody>
-				{% for deck in wishList %}
+				{% for deck in generous %}
 				<tr>
 					<td>{{deck.name}}</td>
 					<td>{{deck.deckClass}}</td>
 					<td>{{deck.deckString}}</td>
+					<td>Share!</td>
 				</tr>
 				{% endfor %}
 			</tbody>
