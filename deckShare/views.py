@@ -105,7 +105,7 @@ def isMakable(deck, profile):
 				return False
 		return True
 	except:
-		print(f"{deckObj} false 3")
+		print(f"{deck} false 3")
 		return False
 
 
