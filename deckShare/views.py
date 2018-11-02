@@ -98,9 +98,10 @@ def isMakable(deck, profile):
 
 			if str(cardId) in profile.collection:
 				print("made it into collection loop")
-				print(profile.collection[cardId])
-				print(sum(profile.collection[cardId]))
-				if sum(profile.collection[cardId]) <= count:
+				
+				print(profile.collection[str(cardId)])
+				print(sum(profile.collection[str(cardId)]))
+				if sum(profile.collection[str(cardId)]) <= count:
 					print(f"{deckObj} false 1")
 					return False
 			else:
