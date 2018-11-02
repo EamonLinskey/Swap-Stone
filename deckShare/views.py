@@ -92,7 +92,7 @@ def IsValidDeckCode(deckString):
 
 def isMakable(deck, profile):
 	try:
-		deck = DeckHearth.from_deckstring(deckString)
+		deck = DeckHearth.from_deckstring(deck.deckString)
 		for cardId,count in deck.cards:
 			if cardId in user.collection:
 				if sum(user.collection[cardId]) <= count:
