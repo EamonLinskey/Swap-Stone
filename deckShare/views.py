@@ -364,5 +364,5 @@ def generous(request):
 		if deck.owner != profile:
 			generous.append(f"{deck} isMakable = {isMakable(deck, request.user.profile)}")
 			if isMakable(deck, request.user.profile):
-				generous.append(match)
+				generous.append(deck)
 	return render(request, "deckShare/generous.html", {"generous": generous})
