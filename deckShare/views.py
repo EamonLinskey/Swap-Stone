@@ -92,21 +92,14 @@ def IsValidDeckCode(deckString):
 
 def isMakable(deck, profile):
 	try:
-		print(deck)
-		print(deck.deckString)
 		deckObj = DeckHearth.from_deckstring(deck.deckString)
-		print(deckObj)
 		for cardId,count in deckObj.cards:
-			print("1")
 			print(cardId)
 			if str(cardId) in profile.collection:
-				print("2")
 				if sum(profile.collection[cardId]) <= count:
-					print("3")
 					print(f"{deckObj} false 1")
 					return False
 			else:
-				print("4")
 				print(f"{deckObj} false 2")
 				return False
 		return True
