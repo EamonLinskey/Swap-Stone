@@ -3,7 +3,6 @@
 {% block body %}
 <div class="background-containter">
 	<div class="heading">Well Met, {{user.username}}</div>
-	<div>----{{generous}}----<div>
 	<div class="container">
 		<div class="Matches">
 			<table class="table table-striped">
@@ -20,7 +19,7 @@
 				<tr>
 					<td>{{deck.name}}</td>
 					<td>{{deck.deckClass}}</td>
-					<td>{{deck.deckString}}</td>
+					<td>{{deck.owner.blizzTag}}</td>
 					<td>Share!</td>
 				</tr>
 				{% endfor %}
