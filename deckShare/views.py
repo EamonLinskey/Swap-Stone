@@ -95,6 +95,7 @@ def isMakable(deck, profile):
 		print(deck)
 		print(deck.deckString)
 		deckObj = DeckHearth.from_deckstring(deck.deckString)
+		print(deckObj)
 		for cardId,count in deckObj.cards:
 			if cardId in user.collection:
 				if sum(user.collection[cardId]) <= count:
