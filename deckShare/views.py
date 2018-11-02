@@ -102,7 +102,7 @@ def isMakable(deck, profile):
 				print(f"collection[id] = {profile.collection[str(cardId)]}")
 				print(f"sum = {sum(profile.collection[str(cardId)])}")
 				print(f"count is {count}")
-				if sum(profile.collection[str(cardId)]) <= count:
+				if sum(profile.collection[str(cardId)]) < count:
 					print(f"{deckObj} false 1")
 					return False
 			else:
