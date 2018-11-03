@@ -347,14 +347,22 @@ def updateCollection(request):
 	else:
 		return render(request, "deckShare/updatedCollection.html", {"message": f"You recently updated your collection. Please wait {API_TIMEOUT_SECS - timeDiff(request)} seconds before trying again"})
 	
-# @login_required
-# def matches(request):
-# 	for deck in Deck.objects.all():
-# 		if deck.owner != request.user.profile:
-# 			if isMakable(deck, request.user.profile):
-# 				match = Match.createMatch()
+@login_required
+def matches(request):
+	potentialMatches = []
+	matches = []
+	profile = request.user.profile
+	for deck in Deck.objects.all():
+		if deck.owner != profile and deck.owner not in potentialMatches:
+			if isMakable(deck, request.user.profile):
+				potentialMatches.append(deck.owner)
+	
+	for owener in potentialMatches:
+		for deck in profile.wishList:
+			if isMakable(deck, owner):
+				matches.append([owner, deck])
 
-# 	return render(request, "deckShare/updatedCollection.html", {"matches": matches.objects.all()})
+	return render(request, "deckShare/updatedCollection.html", {"matches": matches})
 
 @login_required
 def generous(request):

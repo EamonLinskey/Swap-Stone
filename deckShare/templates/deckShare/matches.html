@@ -14,11 +14,11 @@
 				</tr>
 			</thead>
 			<tbody>
-				{% for deck in wishList %}
+				{% for owner,deck in matches %}
 				<tr>
-					<td>{{deck.name}}</td>
-					<td>{{deck.deckClass}}</td>
-					<td>{{deck.deckString}}</td>
+					<td>{{owner}}</td>
+					<td>{{deck}}</td>
+					<td>Share!</td>
 				</tr>
 				{% endfor %}
 			</tbody>
