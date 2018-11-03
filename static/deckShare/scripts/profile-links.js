@@ -7,4 +7,12 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		location.href="profile/wishList"
 	}
 
+	document.querySelector('.matches').onclick = function() {
+		location.href="profile/matches"
+	}
+
+	document.querySelector('.generous').onclick = function() {
+		location.href="profile/generous"
+	}
+
 });
