@@ -364,7 +364,7 @@ def matches(request):
 			if isMakable(deck, owner):
 				matches.append(deck)
 	print(f"matches: {matches}")
-	return render(request, "deckShare/updatedCollection.html", {"matches": matches})
+	return render(request, "deckShare/matches.html", {"matches": matches})
 
 @login_required
 def generous(request):
