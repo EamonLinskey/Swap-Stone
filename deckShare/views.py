@@ -179,7 +179,10 @@ def index(request):
 
 @login_required
 def profile(request):
-	print(f"the mathces are {Match.objects.all()}")
+	matchInfo = Match.objects.all()
+	print(f"the matchs are {matchInfo}")
+	print(f"the match is {matchInfo[0]}")
+	print(f"the match info is {matchInfo[0].deck1.id}")
 	return render(request, "deckShare/profile.html", {"numDecks": len(request.user.profile.wishList.all())})
 
 def signIn(request):
