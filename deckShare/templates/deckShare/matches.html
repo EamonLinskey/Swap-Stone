@@ -3,23 +3,22 @@
 {% block body %}
 <div class="background-containter">
 	<div class="heading">Well Met, {{user.username}}</div>
-	{{matches}}
 	<div class="container">
 		<div class="Matches">
 			<table class="table table-striped">
 			<thead>
 				<tr>
-					<th scope="col">Deck They Have</th>
-					<th scope="col">Deck You Have</th>
+					<th scope="col">Deck Name</th>
+					<th scope="col">Deck string</th>
 					<th scope="col">Share info?</th>
 				</tr>
 			</thead>
 			<tbody>
 				{% for deck in matches %}
 				<tr>
-					<td>{{deck.owner}}</td>
-					<td>{{deck}}</td>
-					<td>Share!</td>
+					<td>{{deck.name}}</td>
+					<td>{{deck.deckString}}</td>
+					<td>Share! {{deck.owner}}</td>
 				</tr>
 				{% endfor %}
 			</tbody>
