@@ -356,12 +356,14 @@ def matches(request):
 		if deck.owner != profile and deck.owner not in potentialMatches:
 			if isMakable(deck, request.user.profile):
 				potentialMatches.append(deck.owner)
-	
+	print(f"Potmatches: {potentialMatches}")
+
 	for owner in potentialMatches:
+		print(f"owner is {owner}")
 		for deck in profile.wishList.all():
 			if isMakable(deck, owner):
 				matches.append([owner, deck])
-
+	print(f"matches: {matches}")
 	return render(request, "deckShare/updatedCollection.html", {"matches": matches})
 
 @login_required
