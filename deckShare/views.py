@@ -358,7 +358,7 @@ def matches(request):
 				potentialMatches.append(deck.owner)
 	
 	for owener in potentialMatches:
-		for deck in profile.wishList:
+		for deck in profile.wishList.all():
 			if isMakable(deck, owner):
 				matches.append([owner, deck])
 
