@@ -362,7 +362,7 @@ def matches(request):
 		print(f"owner is {owner}")
 		for deck in profile.wishList.all():
 			if isMakable(deck, owner):
-				matches.append([owner, deck])
+				matches.append(owner, deck)
 	print(f"matches: {matches}")
 	return render(request, "deckShare/updatedCollection.html", {"matches": matches})
 
