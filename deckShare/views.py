@@ -276,7 +276,7 @@ def findMatches(request, newDeck):
 			for deck in owner.profile.wishList.all():
 				if isMakable(deck, newDeck.owner):
 					Match.objects.createMatch(deck, newDeck)
-	return Match.objects.filter(Q(deck1.id=newDeck.id) | Q(deck2.id=newDeck.id))
+	return Match.objects.filter(Q(deck1=newDeck) | Q(deck2=newDeck))
 
 @login_required
 def wishList(request):
