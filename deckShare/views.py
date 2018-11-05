@@ -184,6 +184,7 @@ def profile(request):
 	# print(f"the matchs are {matchInfo}")
 	# print(f"the match is {matchInfo[0]}")
 	# print(f"the match info is {matchInfo[0].deck1.id}")
+	print(Deck.objects.filter(deck.id > 10))
 	return render(request, "deckShare/profile.html", {"numDecks": len(request.user.profile.wishList.all())})
 
 def signIn(request):
@@ -271,11 +272,17 @@ def registered(request):
 		return HttpResponseRedirect(reverse("index"))
 
 def findMatches(request, newDeck):
+	# Looks through all owners to see who's collections can make the new deck
 	for owner in Profile.objects.all():
 		if newDeck.owner != owner and isMakable(newDeck, owner):
+
+			# Looks through matching owners decks to see if current user 
+			# can make any of their decks with their own collections to complete the match
 			for deck in owner.wishList.all():
 				if isMakable(deck, newDeck.owner):
 					Match.objects.createMatch(deck, newDeck)
+
+	# Returns the matches that the deck has
 	return Match.objects.filter(Q(deck1=newDeck) | Q(deck2=newDeck))
 
 @login_required
