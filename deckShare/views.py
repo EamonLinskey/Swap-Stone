@@ -273,7 +273,7 @@ def registered(request):
 def findMatches(request, newDeck):
 	for owner in Profile.objects.all():
 		if newDeck.owner != owner and isMakable(newDeck, owner):
-			for deck in owner.profile.wishList.all():
+			for deck in owner.wishList.all():
 				if isMakable(deck, newDeck.owner):
 					Match.objects.createMatch(deck, newDeck)
 	return Match.objects.filter(Q(deck1=newDeck) | Q(deck2=newDeck))
