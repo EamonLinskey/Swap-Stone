@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.http import (HttpResponse, HttpResponseRedirect, 
 						HttpResponseNotAllowed, HttpRequest)
 from django.utils.html import escape
+from django.db.models import Q
 from requests_oauthlib import OAuth2Session
 from hearthstone.deckstrings import Deck as DeckHearth
 from hearthstone.enums import FormatType
@@ -179,10 +180,10 @@ def index(request):
 
 @login_required
 def profile(request):
-	matchInfo = Match.objects.all()
-	print(f"the matchs are {matchInfo}")
-	print(f"the match is {matchInfo[0]}")
-	print(f"the match info is {matchInfo[0].deck1.id}")
+	# matchInfo = Match.objects.all()
+	# print(f"the matchs are {matchInfo}")
+	# print(f"the match is {matchInfo[0]}")
+	# print(f"the match info is {matchInfo[0].deck1.id}")
 	return render(request, "deckShare/profile.html", {"numDecks": len(request.user.profile.wishList.all())})
 
 def signIn(request):
@@ -269,6 +270,14 @@ def registered(request):
 	else:
 		return HttpResponseRedirect(reverse("index"))
 
+def findMatches(request, newDeck):
+	for owner in Profile.objects.all():
+		if newDeck.owner != owner and isMakable(newDeck, owner):
+			for deck in owner.profile.wishList.all()
+				if isMakable(deck, newDeck.owner):
+					Match.objects.createMatch(deck, newDeck)
+	return Match.objects.filter(Q(deck1.id=newDeck.id) | Q(deck2.id=newDeck.id))
+
 @login_required
 def wishList(request):
 	context = {}
@@ -294,6 +303,7 @@ def wishList(request):
 					deck.save()	
 					request.user.profile.wishList.add(deck)
 					request.user.save()
+					findMatches(request, deck)
 				else:
 					context["message"] = "You already have added this code"
 					context["deckCode"] = deckCode
@@ -378,3 +388,5 @@ def generous(request):
 			if isMakable(deck, request.user.profile):
 				generous.append(deck)
 	return render(request, "deckShare/generous.html", {"generous": generous})
+
+

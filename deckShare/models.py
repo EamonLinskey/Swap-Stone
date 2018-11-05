@@ -7,7 +7,7 @@ from django.dispatch import receiver
 # Create your models here.
 class DeckManager(models.Manager):
     def createDeck(self, name, deckString, deckClass, owner):
-        deck = self.create(name=name, deckString=deckString, deckClass=deckClass, owner=owner)
+        deck = self.create(name=name, deckString=deckString, deckClass=deckClass, owner=owner, maxMatchIdChecked=0)
         return deck
 
 class MatchManager(models.Manager):
@@ -47,6 +47,7 @@ class Deck(models.Model):
 	name = models.CharField(max_length=50)
 	deckString = models.CharField(max_length=200)
 	deckClass = models.CharField(max_length=20)
+	maxMatchIdChecked = models.IntegerField()
 	objects = DeckManager()
 
 class Match(models.Model):
