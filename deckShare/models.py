@@ -66,5 +66,5 @@ class Generous(models.Model):
 	deck = models.ForeignKey(Deck, on_delete=models.CASCADE)
 	objects = GenerousManager()
 	def __str__(self):
-		return f"{deck.name,}"
+		return f"{deck.name}"
 
