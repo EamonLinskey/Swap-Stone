@@ -346,7 +346,7 @@ def loadedCollection(request):
 		        	HSR_TOKEN_URL,
 		        	authorization_response=authorization_response)
 		getUserData(request, oauth)
-		#clearMatches(request.user)
+		clearMatches(request.user)
 		#for deck in request.user.profile.wishList.objects.all():
 			#findMatches(request, deck)
 		return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
