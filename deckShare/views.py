@@ -387,6 +387,7 @@ def updateCollection(request):
 def clearMatches(user):
 	for match in user.profile.matches.all():
 		match.clear()
+	user.save()
 
 @login_required
 def matches(request):
