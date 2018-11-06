@@ -276,7 +276,7 @@ def findMatches(request, newDeck):
 						Match.objects.createMatch(deck, newDeck)
 
 	# Returns the matches that the deck has
-	return Match.objects.filter(Q(deck1=newDeck) | Q(deck2=newDeck))
+	# return Match.objects.filter(Q(deck1=newDeck) | Q(deck2=newDeck))
 
 @login_required
 def wishList(request):
