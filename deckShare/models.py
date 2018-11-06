@@ -31,6 +31,7 @@ class Profile(models.Model):
 	lastUpdateCollection = models.CharField(max_length=100, blank=True)
 	time = models.FloatField(blank=False, default = 0)
 	collection = JSONField(blank=True, null=True)
+	readonly_fields=('id',)
 	def __str__(self):
 		return f"{self.user.username}'s profile"
 
@@ -51,12 +52,14 @@ class Deck(models.Model):
 	deckClass = models.CharField(max_length=20)
 	maxMatchIdChecked = models.IntegerField()
 	objects = DeckManager()
+	readonly_fields=('id',)
 	def __str__(self):
 		return f"{self.name} deck object"
 
 class Match(models.Model):
 	deck1 = models.ForeignKey(Deck, on_delete=models.CASCADE, related_name="deck1")
 	deck2 = models.ForeignKey(Deck, on_delete=models.CASCADE, related_name="deck2")
+	readonly_fields=('id',)
 	objects = MatchManager()
 	def __str__(self):
 		return f"Match of {self.deck1.name} and {self.deck2.name}"
@@ -64,6 +67,7 @@ class Match(models.Model):
 
 class Generous(models.Model):
 	deck = models.ForeignKey(Deck, on_delete=models.CASCADE)
+	readonly_fields=('id',)
 	objects = GenerousManager()
 	def __str__(self):
 		return f"{deck.name}"
