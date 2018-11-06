@@ -263,7 +263,7 @@ def registered(request):
 def findMatches(request, newDeck):
 	# Looks through all owners to see who's collections can make the new deck
 	for owner in Profile.objects.all():
-		for i in range(1000):
+		for _ in range(1500):
 			if newDeck.owner != owner and isMakable(newDeck, owner):
 
 				# Looks through matching owners decks to see if current user 
