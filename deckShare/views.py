@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.http import (HttpResponse, HttpResponseRedirect, 
 						HttpResponseNotAllowed, HttpRequest)
 from django.utils.html import escape
-from django.db.models import Q
+from django.db.models import Q, Max
 from requests_oauthlib import OAuth2Session
 from hearthstone.deckstrings import Deck as DeckHearth
 from hearthstone.enums import FormatType
@@ -29,6 +29,9 @@ HSR_AUTHORIZATION_URL = 'https://hsreplay.net/oauth2/authorize/'
 HSR_TOKEN_URL = 'https://hsreplay.net/oauth2/token/'
 HSR_ACCOUNT_URL = 'https://hsreplay.net/api/v1/account/'
 #CLASSES = {heroes}
+
+mostRecentActivity = Profile.objects.all().aggregate((Max('latestActivity')))
+print(mostRecentActivity)
 
 # Used to make teh full colllection json file locally
 # should only be run when new cards are added to update file
@@ -266,14 +269,13 @@ def registered(request):
 def findMatches(request, newDeck):
 	# Looks through all owners to see who's collections can make the new deck
 	for owner in Profile.objects.all():
-		for _ in range(1500):
-			if newDeck.owner != owner and isMakable(newDeck, owner):
+		if newDeck.owner != owner and isMakable(newDeck, owner):
 
-				# Looks through matching owners decks to see if current user 
-				# can make any of their decks with their own collections to complete the match
-				for deck in owner.wishList.all():
-					if isMakable(deck, newDeck.owner):
-						Match.objects.createMatch(deck, newDeck)
+			# Looks through matching owners decks to see if current user 
+			# can make any of their decks with their own collections to complete the match
+			for deck in owner.wishList.all():
+				if isMakable(deck, newDeck.owner):
+					Match.objects.createMatch(deck, newDeck)
 
 	# Returns the matches that the deck has
 	# return Match.objects.filter(Q(deck1=newDeck) | Q(deck2=newDeck))
