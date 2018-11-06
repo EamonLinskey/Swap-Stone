@@ -390,7 +390,7 @@ def clearMatches(user):
 	print(user.profile.matches)
 	print(user.profile.matches.all())
 	for match in user.profile.matches.all():
-		match.clear()
+		match.delete()
 		print("cleared")
 	user.save()
 
