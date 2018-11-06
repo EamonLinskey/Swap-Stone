@@ -385,6 +385,9 @@ def updateCollection(request):
 	
 # Deletes all matches a user has
 def clearMatches(user):
+	print(user)
+	print(user.profile)
+	print(user.profile.matches)
 	print(user.profile.matches.all())
 	for match in user.profile.matches.all():
 		match.clear()
