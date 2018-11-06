@@ -32,8 +32,8 @@ HSR_ACCOUNT_URL = 'https://hsreplay.net/api/v1/account/'
 
 
 #print(Profile.objects.all())
-#mostRecentActivity = Profile.objects.all().aggregate(Max('latestActivity'))
-#print(mostRecentActivity)
+mostRecentActivity = Profile.objects.all().aggregate(Max('latestActivity'))
+print(mostRecentActivity)
 
 # Used to make teh full colllection json file locally
 # should only be run when new cards are added to update file
