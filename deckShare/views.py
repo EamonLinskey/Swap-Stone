@@ -328,7 +328,7 @@ def deleteFromWishlist(request):
 	try:
 		deckId = escape(request.POST.get("deckToDelete"))
 		wishList = request.user.profile.wishList.all()
-		wishList.get(id=deckId).delete()cf
+		wishList.get(id=deckId).delete()
 		return render(request, "deckShare/wishList.html", {"wishList": wishList})
 	except:
 		message = "An error occured"
