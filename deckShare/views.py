@@ -319,7 +319,7 @@ def wishList(request):
 					deck.save()	
 					request.user.profile.wishList.add(deck)
 					request.user.save()
-					updateActivity()
+					updateActivity(request)
 					findMatches(request, deck)
 				else:
 					context["message"] = "You already have added this code"
