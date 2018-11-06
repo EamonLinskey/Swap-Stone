@@ -212,15 +212,15 @@ def signedIn(request):
 			password = request.POST["password"]
 		if request.POST["username"]:
 			username= request.POST["username"]
-		try:
-			user = authenticate(request, username=username, password=password)
-			login(request, user)
-			updateActivity(request)
-			return HttpResponseRedirect(reverse("profile"))
-		except:
-			return render(request, "deckShare/signIn.html", 
-							{"message": "Invalid Credentials",
-							 "username": username})
+		
+		user = authenticate(request, username=username, password=password)
+		login(request, user)
+		updateActivity(request)
+		return HttpResponseRedirect(reverse("profile"))
+	
+		return render(request, "deckShare/signIn.html", 
+						{"message": "Invalid Credentials",
+						 "username": username})
 	else:
 		return HttpResponseRedirect(reverse("profile"))
 
