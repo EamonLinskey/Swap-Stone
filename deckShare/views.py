@@ -338,20 +338,20 @@ def updatedCollection(request):
 
 @login_required
 def loadedCollection(request):
-	try:
-		state = request.user.profile.state
-		oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE, state=state)
-		authorization_response = request.build_absolute_uri()
-		token = oauth.fetch_token(
-		        	HSR_TOKEN_URL,
-		        	authorization_response=authorization_response)
-		getUserData(request, oauth)
-		clearMatches(request.user)
-		#for deck in request.user.profile.wishList.objects.all():
-			#findMatches(request, deck)
-		return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
-	except:
-		return render(request, "deckShare/updatedCollection.html", {"message": "There was an error."})
+	# try:
+	state = request.user.profile.state
+	oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE, state=state)
+	authorization_response = request.build_absolute_uri()
+	token = oauth.fetch_token(
+	        	HSR_TOKEN_URL,
+	        	authorization_response=authorization_response)
+	getUserData(request, oauth)
+	clearMatches(request.user)
+	#for deck in request.user.profile.wishList.objects.all():
+		#findMatches(request, deck)
+	return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
+	# except:
+	# 	return render(request, "deckShare/updatedCollection.html", {"message": "There was an error."})
 
 @login_required
 def updateCollection(request):
