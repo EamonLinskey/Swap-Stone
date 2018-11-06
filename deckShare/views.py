@@ -135,6 +135,13 @@ def getUserData(request, oauth):
 	profile.time = time.time()
 	request.user.save()
 
+def updateActivity(request):
+	userActive = request.user.profile.mostRecentActivity
+	maxActive = Profile.objects.all().aggregate(Max('latestActivity'))
+	if userActive != maxActive:
+		userActive = maxActive + 1
+		request.user.save()
+
 def authorizeHSRAccess(request):
 	# set up OAuth2 Session
 	oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE)
@@ -186,6 +193,7 @@ def profile(request):
 
 def signIn(request):
 	if request.user.is_authenticated:
+		updateActivity(request)
 		return HttpResponseRedirect(reverse("profile"))
 	else:
 		return render(request, "deckShare/signIn.html")
@@ -206,6 +214,7 @@ def signedIn(request):
 		try:
 			user = authenticate(request, username=username, password=password)
 			login(request, user)
+			updateActivity(request)
 			return HttpResponseRedirect(reverse("profile"))
 		except:
 			return render(request, "deckShare/signIn.html", 
@@ -217,6 +226,7 @@ def signedIn(request):
 
 def register(request):
 	if request.user.is_authenticated:
+		updateActivity(request)
 		return HttpResponseRedirect(reverse("profile"))
 	else:
 		# This temporarily disables new accounts so I can test online 
@@ -260,6 +270,7 @@ def registered(request):
 				user = User.objects.create_user(username=username, email=email, 
 												password=password)
 				login(request, user)
+				updateActivity(request)
 				return HttpResponseRedirect(reverse("profile"))
 			except:
 				return render(request, "deckShare/register.html", 
@@ -307,6 +318,7 @@ def wishList(request):
 					deck.save()	
 					request.user.profile.wishList.add(deck)
 					request.user.save()
+					request.user.profile.mostRecentActivity = Profile.objects.all().aggregate(Max('latestActivity')) + 1
 					findMatches(request, deck)
 				else:
 					context["message"] = "You already have added this code"
@@ -318,7 +330,6 @@ def wishList(request):
 			context["deckName"] = deckName
 	
 	context["wishList"] = request.user.profile.wishList.all()
-	print(context)
 	return render(request, "deckShare/wishList.html", context)
 
 @login_required
@@ -327,6 +338,7 @@ def deleteFromWishlist(request):
 		deckId = escape(request.POST.get("deckToDelete"))
 		wishList = request.user.profile.wishList.all()
 		wishList.get(id=deckId).delete()
+		updateActivity(request)
 		return render(request, "deckShare/wishList.html", {"wishList": wishList})
 	except:
 		message = "An error occured"
@@ -335,6 +347,7 @@ def deleteFromWishlist(request):
 @login_required
 def updatedCollection(request):
 	if timeDiff(request) > API_TIMEOUT_SECS:
+		updateActivity(request)
 		return refreshHSRAccess(request)
 	else:
 		return render(request, "deckShare/updatedCollection.html", 
@@ -351,6 +364,7 @@ def loadedCollection(request):
 		        	authorization_response=authorization_response)
 		getUserData(request, oauth)
 		clearMatches(request.user)
+		updateActivity(request)
 		for deck in request.user.profile.wishList.all():
 			findMatches(request, deck)
 		return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
@@ -360,6 +374,7 @@ def loadedCollection(request):
 @login_required
 def updateCollection(request):
 	if timeDiff(request) > API_TIMEOUT_SECS:
+		updateActivity(request)
 		if request.user.profile.token is None:
 			return authorizeHSRAccess(request)
 		else:
