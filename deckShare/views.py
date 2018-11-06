@@ -155,6 +155,9 @@ def refreshHSRAccess(request):
 		# Update collection with new token
 		token = oauth.refresh_token(HSR_TOKEN_URL, **clientInfo)
 		getUserData(request, oauth)
+		clearMatches(request.user)
+		for deck in request.user.profile.wishList.objects.all():
+			findMatches(request, deck)
 		return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
 	except:
 		# If access was revoked this tries to reauthorize
