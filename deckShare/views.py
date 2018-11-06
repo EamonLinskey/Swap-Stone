@@ -95,23 +95,13 @@ def isMakable(deck, profile):
 	try:
 		deckObj = DeckHearth.from_deckstring(deck.deckString)
 		for cardId,count in deckObj.cards:
-			#print(cardId)
-
 			if str(cardId) in profile.collection:
-				#print("made it into collection loop")
-
-				#print(f"collection[id] = {profile.collection[str(cardId)]}")
-				#print(f"sum = {sum(profile.collection[str(cardId)])}")
-				#print(f"count is {count}")
 				if sum(profile.collection[str(cardId)]) < count:
-					#print(f"{deckObj} false 1")
 					return False
 			else:
-				#print(f"{deckObj} false 2")
 				return False
 		return True
 	except:
-		#print(f"{deck} false 3")
 		return False
 
 
@@ -273,13 +263,14 @@ def registered(request):
 def findMatches(request, newDeck):
 	# Looks through all owners to see who's collections can make the new deck
 	for owner in Profile.objects.all():
-		if newDeck.owner != owner and isMakable(newDeck, owner):
+		for i in range(1000):
+			if newDeck.owner != owner and isMakable(newDeck, owner):
 
-			# Looks through matching owners decks to see if current user 
-			# can make any of their decks with their own collections to complete the match
-			for deck in owner.wishList.all():
-				if isMakable(deck, newDeck.owner):
-					Match.objects.createMatch(deck, newDeck)
+				# Looks through matching owners decks to see if current user 
+				# can make any of their decks with their own collections to complete the match
+				for deck in owner.wishList.all():
+					if isMakable(deck, newDeck.owner):
+						Match.objects.createMatch(deck, newDeck)
 
 	# Returns the matches that the deck has
 	return Match.objects.filter(Q(deck1=newDeck) | Q(deck2=newDeck))
