@@ -30,9 +30,10 @@ HSR_TOKEN_URL = 'https://hsreplay.net/oauth2/token/'
 HSR_ACCOUNT_URL = 'https://hsreplay.net/api/v1/account/'
 #CLASSES = {heroes}
 
-print(Profile.objects.all())
-mostRecentActivity = Profile.objects.all().aggregate(Max('latestActivity'))
-print(mostRecentActivity)
+
+#print(Profile.objects.all())
+#mostRecentActivity = Profile.objects.all().aggregate(Max('latestActivity'))
+#print(mostRecentActivity)
 
 # Used to make teh full colllection json file locally
 # should only be run when new cards are added to update file

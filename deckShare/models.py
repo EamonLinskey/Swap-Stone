@@ -30,8 +30,8 @@ class Profile(models.Model):
 	token = JSONField(blank=True, null=True)
 	lastUpdateCollection = models.CharField(max_length=100, blank=True)
 	time = models.FloatField(blank=False, default = 0)
-	latestActivity = models.IntegerField()
 	collection = JSONField(blank=True, null=True)
+	latestActivity = models.IntegerField()
 	def __str__(self):
 		return f"{self.user.username}'s profile"
 
