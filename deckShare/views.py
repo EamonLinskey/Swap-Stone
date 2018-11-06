@@ -319,7 +319,7 @@ def wishList(request):
 					deck.save()	
 					request.user.profile.wishList.add(deck)
 					request.user.save()
-					request.user.profile.mostRecentActivity = Profile.objects.all().aggregate(Max('latestActivity')) + 1
+					updateActivity()
 					findMatches(request, deck)
 				else:
 					context["message"] = "You already have added this code"
