@@ -185,6 +185,7 @@ def index(request):
 
 @login_required
 def profile(request):
+	clearMatches(request.user)
 	# matchInfo = Match.objects.all()
 	# print(f"the matchs are {matchInfo}")
 	# print(f"the match is {matchInfo[0]}")
