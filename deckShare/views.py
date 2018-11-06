@@ -137,7 +137,7 @@ def getUserData(request, oauth):
 
 def updateActivity(request):
 	userActive = request.user.profile.latestActivity
-	maxActive = Profile.objects.all().aggregate(Max('latestActivity'))
+	maxActive = Profile.objects.all().aggregate(Max('latestActivity'))["latestActivity__max"]
 	if userActive != maxActive:
 		userActive = maxActive + 1
 		request.user.save()
