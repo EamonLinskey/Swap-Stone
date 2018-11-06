@@ -184,7 +184,6 @@ def profile(request):
 	# print(f"the matchs are {matchInfo}")
 	# print(f"the match is {matchInfo[0]}")
 	# print(f"the match info is {matchInfo[0].deck1.id}")
-	print(Deck.objects.filter(deck.id > 10))
 	return render(request, "deckShare/profile.html", {"numDecks": len(request.user.profile.wishList.all())})
 
 def signIn(request):
@@ -329,7 +328,7 @@ def deleteFromWishlist(request):
 	try:
 		deckId = escape(request.POST.get("deckToDelete"))
 		wishList = request.user.profile.wishList.all()
-		wishList.get(id=deckId).delete()
+		wishList.get(id=deckId).delete()cf
 		return render(request, "deckShare/wishList.html", {"wishList": wishList})
 	except:
 		message = "An error occured"
@@ -353,6 +352,9 @@ def loadedCollection(request):
 		        	HSR_TOKEN_URL,
 		        	authorization_response=authorization_response)
 		getUserData(request, oauth)
+		clearMatches(request.user)
+		for deck in request.user.profile.wishList.objects.all():
+			findMatches(request, deck)
 		return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
 	except:
 		return render(request, "deckShare/updatedCollection.html", {"message": "There was an error."})
@@ -367,6 +369,11 @@ def updateCollection(request):
 	else:
 		return render(request, "deckShare/updatedCollection.html", {"message": f"You recently updated your collection. Please wait {API_TIMEOUT_SECS - timeDiff(request)} seconds before trying again"})
 	
+# Deletes all matches a user has
+def clearMatches(user):
+	for match in user.profile.matches.objects.all():
+		match.clear()
+
 @login_required
 def matches(request):
 	potentialMatches = []
