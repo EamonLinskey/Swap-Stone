@@ -137,7 +137,7 @@ def getUserData(request, oauth):
 
 def updateActivity(request):
 	userActive = request.user.profile.latestActivity
-	maxActive = Profile.objects.all().aggregate(Max('latestActivity'))["latestActivity__max"]
+	maxActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max']
 	if userActive != maxActive:
 		userActive = maxActive + 1
 		request.user.save()
@@ -212,15 +212,15 @@ def signedIn(request):
 			password = request.POST["password"]
 		if request.POST["username"]:
 			username= request.POST["username"]
-		
-		user = authenticate(request, username=username, password=password)
-		login(request, user)
-		updateActivity(request)
-		return HttpResponseRedirect(reverse("profile"))
-	
-		return render(request, "deckShare/signIn.html", 
-						{"message": "Invalid Credentials",
-						 "username": username})
+		try:
+			user = authenticate(request, username=username, password=password)
+			login(request, user)
+			updateActivity(request)
+			return HttpResponseRedirect(reverse("profile"))
+		except:
+			return render(request, "deckShare/signIn.html", 
+							{"message": "Invalid Credentials",
+							 "username": username})
 	else:
 		return HttpResponseRedirect(reverse("profile"))
 
