@@ -295,11 +295,10 @@ def findMatches(request, newDeck, recentActOwners):
 				if isMakable(deck, newDeck.owner):
 					#Match.objects.createMatch(deck, newDeck)
 					matches.append(Match(deck1=deck, deck2=newDeck))
+	
+	# Create new matches and associate them with the user
 	matchObjs = Match.objects.bulk_create(matches)
-	print(f"match objects are : {matchObjs}")
 	request.user.profile.matches.add(*matchObjs)
-	# Returns the matches that the deck has
-	# return Match.objects.filter(Q(deck1=newDeck) | Q(deck2=newDeck))
 
 @login_required
 def wishList(request):
@@ -410,22 +409,23 @@ def deleteAllMatches():
 
 @login_required
 def matches(request):
-	potentialMatches = []
-	matches = []
-	profile = request.user.profile
-	for deck in Deck.objects.all():
-		if deck.owner != profile and deck.owner not in potentialMatches:
-			if isMakable(deck, request.user.profile):
-				potentialMatches.append(deck.owner)
-	print(f"Potmatches: {potentialMatches}")
+	# potentialMatches = []
+	# matches = []
+	# profile = request.user.profile
+	# for deck in Deck.objects.all():
+	# 	if deck.owner != profile and deck.owner not in potentialMatches:
+	# 		if isMakable(deck, request.user.profile):
+	# 			potentialMatches.append(deck.owner)
+	# print(f"Potmatches: {potentialMatches}")
 
-	for owner in potentialMatches:
-		print(f"owner is {owner}")
-		for deck in profile.wishList.all():
-			if isMakable(deck, owner):
-				matches.append(deck)
-	print(f"matches: {matches}")
-	return render(request, "deckShare/matches.html", {"matches": matches})
+	# for owner in potentialMatches:
+	# 	print(f"owner is {owner}")
+	# 	for deck in profile.wishList.all():
+	# 		if isMakable(deck, owner):
+	# 			matches.append(deck)
+	# print(f"matches: {matches}")
+
+	return render(request, "deckShare/matches.html", {"matches": request.user.profile.matches.all()})
 
 @login_required
 def generous(request):
