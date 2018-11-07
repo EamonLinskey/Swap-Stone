@@ -169,8 +169,10 @@ def refreshHSRAccess(request):
 		token = oauth.refresh_token(HSR_TOKEN_URL, **clientInfo)
 		getUserData(request, oauth)
 		clearMatches(request.user)
+		recentActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max'] - MAX_USER_SEARCHES
+		recentActOwners = Profile.objects.filter(latestActivity__gte= recentActive)
 		for deck in request.user.profile.wishList.objects.all():
-			findMatches(request, deck)
+			findMatches(request, deck, recentActOwners)
 		return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
 	except:
 		# If access was revoked this tries to reauthorize
@@ -282,23 +284,21 @@ def registered(request):
 	else:
 		return HttpResponseRedirect(reverse("index"))
 
-def findMatches(request, newDeck):
+def findMatches(request, newDeck, recentActOwners):
+	matches = []
 	# Looks through all owners to see who's collections can make the new deck
-	#recentActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max'] - MAX_USER_SEARCHES
-	recentActive = 0
-	for owner in Profile.objects.filter(latestActivity__gte= recentActive):
-		for i in range(1000):
+	for i in range(1000):
+		for owner in recentActOwners:
 			if newDeck.owner != owner and isMakable(newDeck, owner):
-
 				# Looks through matching owners decks to see if current user 
 				# can make any of their decks with their own collections to complete the match
 				for deck in owner.wishList.all():
 					if isMakable(deck, newDeck.owner):
 						#Match.objects.createMatch(deck, newDeck)
-						print("match made")
-
-	# Returns the matches that the deck has
-	# return Match.objects.filter(Q(deck1=newDeck) | Q(deck2=newDeck))
+						matches.append(Match(deck1=deck, deck2=newDeck))
+		Match.objects.bulk_create(matches)
+		# Returns the matches that the deck has
+		# return Match.objects.filter(Q(deck1=newDeck) | Q(deck2=newDeck))
 
 @login_required
 def wishList(request):
@@ -326,7 +326,9 @@ def wishList(request):
 					request.user.profile.wishList.add(deck)
 					request.user.save()
 					updateActivity(request)
-					findMatches(request, deck)
+					recentActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max'] - MAX_USER_SEARCHES
+					recentActOwners = Profile.objects.filter(latestActivity__gte= recentActive)
+					findMatches(request, deck, recentActOwners)
 				else:
 					context["message"] = "You already have added this code"
 					context["deckCode"] = deckCode
@@ -372,8 +374,10 @@ def loadedCollection(request):
 		getUserData(request, oauth)
 		clearMatches(request.user)
 		updateActivity(request)
+		recentActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max'] - MAX_USER_SEARCHES
+		recentActOwners = Profile.objects.filter(latestActivity__gte= recentActive)
 		for deck in request.user.profile.wishList.all():
-			findMatches(request, deck)
+			findMatches(request, deck, recentActOwners)
 		return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
 	except:
 	 	return render(request, "deckShare/updatedCollection.html", {"message": "There was an error."})
