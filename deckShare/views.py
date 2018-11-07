@@ -285,8 +285,8 @@ def registered(request):
 def findMatches(request, newDeck):
 	# Looks through all owners to see who's collections can make the new deck
 	recentActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max'] - MAX_USER_SEARCHES
+	for owner in Profile.objects.filter(latestActivity__gte= recentActive):
 	for i in range(334):
-		for owner in Profile.objects.filter(latestActivity__gte= recentActive):
 			if newDeck.owner != owner and isMakable(newDeck, owner):
 
 				# Looks through matching owners decks to see if current user 
