@@ -284,17 +284,17 @@ def registered(request):
 
 def findMatches(request, newDeck):
 	# Looks through all owners to see who's collections can make the new deck
-	recentActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max'] - MAX_USER_SEARCHES
+	#recentActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max'] - MAX_USER_SEARCHES
 	#for owner in Profile.objects.filter(latestActivity__gte= recentActive):
 	for i in range(334):
-			if newDeck.owner != owner and isMakable(newDeck, owner):
+		if newDeck.owner != owner and isMakable(newDeck, owner):
 
-				# Looks through matching owners decks to see if current user 
-				# can make any of their decks with their own collections to complete the match
-				for deck in owner.wishList.all():
-					if isMakable(deck, newDeck.owner):
-						#Match.objects.createMatch(deck, newDeck)
-						print("match made")
+			# Looks through matching owners decks to see if current user 
+			# can make any of their decks with their own collections to complete the match
+			for deck in owner.wishList.all():
+				if isMakable(deck, newDeck.owner):
+					#Match.objects.createMatch(deck, newDeck)
+					print("match made")
 
 	# Returns the matches that the deck has
 	# return Match.objects.filter(Q(deck1=newDeck) | Q(deck2=newDeck))
