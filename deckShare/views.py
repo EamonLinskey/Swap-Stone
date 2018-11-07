@@ -295,7 +295,8 @@ def findMatches(request, newDeck, recentActOwners):
 				if isMakable(deck, newDeck.owner):
 					#Match.objects.createMatch(deck, newDeck)
 					matches.append(Match(deck1=deck, deck2=newDeck))
-	Match.objects.bulk_create(matches)
+	matchObjs = Match.objects.bulk_create(matches)
+	request.user.profile.set(matchObjs)
 	# Returns the matches that the deck has
 	# return Match.objects.filter(Q(deck1=newDeck) | Q(deck2=newDeck))
 
