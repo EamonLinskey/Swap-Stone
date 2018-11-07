@@ -287,18 +287,17 @@ def registered(request):
 def findMatches(request, newDeck, recentActOwners):
 	matches = []
 	# Looks through all owners to see who's collections can make the new deck
-	for i in range(1000):
-		for owner in recentActOwners:
-			if newDeck.owner != owner and isMakable(newDeck, owner):
-				# Looks through matching owners decks to see if current user 
-				# can make any of their decks with their own collections to complete the match
-				for deck in owner.wishList.all():
-					if isMakable(deck, newDeck.owner):
-						#Match.objects.createMatch(deck, newDeck)
-						matches.append(Match(deck1=deck, deck2=newDeck))
-		Match.objects.bulk_create(matches)
-		# Returns the matches that the deck has
-		# return Match.objects.filter(Q(deck1=newDeck) | Q(deck2=newDeck))
+	for owner in recentActOwners:
+		if newDeck.owner != owner and isMakable(newDeck, owner):
+			# Looks through matching owners decks to see if current user 
+			# can make any of their decks with their own collections to complete the match
+			for deck in owner.wishList.all():
+				if isMakable(deck, newDeck.owner):
+					#Match.objects.createMatch(deck, newDeck)
+					matches.append(Match(deck1=deck, deck2=newDeck))
+	Match.objects.bulk_create(matches)
+	# Returns the matches that the deck has
+	# return Match.objects.filter(Q(deck1=newDeck) | Q(deck2=newDeck))
 
 @login_required
 def wishList(request):
