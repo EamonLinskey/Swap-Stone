@@ -424,8 +424,9 @@ def matches(request):
 	# 		if isMakable(deck, owner):
 	# 			matches.append(deck)
 	# print(f"matches: {matches}")
+	
 
-	return render(request, "deckShare/matches.html", {"matches": Match.objects.filter(deck1__owner=request.user.profile)})
+	return render(request, "deckShare/matches.html", {"matches": Match.Match.objects.filter(deck1__owner=request.user.profile) | Q(deck2__owner=request.user.profile))})
 
 @login_required
 def generous(request):
