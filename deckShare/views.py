@@ -375,7 +375,7 @@ def loadedCollection(request):
 		findMatches(request, deck)
 	return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
 
- 	return render(request, "deckShare/updatedCollection.html", {"message": "There was an error."})
+ 	#return render(request, "deckShare/updatedCollection.html", {"message": "There was an error."})
 
 @login_required
 def updateCollection(request):
