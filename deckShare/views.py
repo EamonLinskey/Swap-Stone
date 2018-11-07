@@ -364,23 +364,22 @@ def updatedCollection(request):
 
 @login_required
 def loadedCollection(request):
-	try:
-		state = request.user.profile.state
-		oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE, state=state)
-		authorization_response = request.build_absolute_uri()
-		token = oauth.fetch_token(
-		        	HSR_TOKEN_URL,
-		        	authorization_response=authorization_response)
-		getUserData(request, oauth)
-		clearMatches(request.user)
-		updateActivity(request)
-		recentActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max'] - MAX_USER_SEARCHES
-		recentActOwners = Profile.objects.filter(latestActivity__gte= recentActive)
-		for deck in request.user.profile.wishList.all():
-			findMatches(request, deck, recentActOwners)
-		return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
-	except:
-	 	return render(request, "deckShare/updatedCollection.html", {"message": "There was an error."})
+
+	state = request.user.profile.state
+	oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE, state=state)
+	authorization_response = request.build_absolute_uri()
+	token = oauth.fetch_token(
+	        	HSR_TOKEN_URL,
+	        	authorization_response=authorization_response)
+	getUserData(request, oauth)
+	clearMatches(request.user)
+	updateActivity(request)
+	recentActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max'] - MAX_USER_SEARCHES
+	recentActOwners = Profile.objects.filter(latestActivity__gte= recentActive)
+	for deck in request.user.profile.wishList.all():
+		findMatches(request, deck, recentActOwners)
+	return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
+	
 
 @login_required
 def updateCollection(request):
