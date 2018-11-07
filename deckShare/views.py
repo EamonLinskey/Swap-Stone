@@ -285,16 +285,17 @@ def registered(request):
 def findMatches(request, newDeck):
 	# Looks through all owners to see who's collections can make the new deck
 	#recentActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max'] - MAX_USER_SEARCHES
-	#for owner in Profile.objects.filter(latestActivity__gte= recentActive):
-	for i in range(334):
-		if newDeck.owner != owner and isMakable(newDeck, owner):
+	recentActive = 0
+	for owner in Profile.objects.filter(latestActivity__gte= recentActive):
+		for i in range(334):
+			if newDeck.owner != owner and isMakable(newDeck, owner):
 
-			# Looks through matching owners decks to see if current user 
-			# can make any of their decks with their own collections to complete the match
-			for deck in owner.wishList.all():
-				if isMakable(deck, newDeck.owner):
-					#Match.objects.createMatch(deck, newDeck)
-					print("match made")
+				# Looks through matching owners decks to see if current user 
+				# can make any of their decks with their own collections to complete the match
+				for deck in owner.wishList.all():
+					if isMakable(deck, newDeck.owner):
+						#Match.objects.createMatch(deck, newDeck)
+						print("match made")
 
 	# Returns the matches that the deck has
 	# return Match.objects.filter(Q(deck1=newDeck) | Q(deck2=newDeck))
@@ -361,21 +362,21 @@ def updatedCollection(request):
 
 @login_required
 def loadedCollection(request):
-	
-	state = request.user.profile.state
-	oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE, state=state)
-	authorization_response = request.build_absolute_uri()
-	token = oauth.fetch_token(
-	        	HSR_TOKEN_URL,
-	        	authorization_response=authorization_response)
-	getUserData(request, oauth)
-	clearMatches(request.user)
-	updateActivity(request)
-	for deck in request.user.profile.wishList.all():
-		findMatches(request, deck)
-	return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
-
- 	#return render(request, "deckShare/updatedCollection.html", {"message": "There was an error."})
+	try:
+		state = request.user.profile.state
+		oauth = OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI, scope=SCOPE, state=state)
+		authorization_response = request.build_absolute_uri()
+		token = oauth.fetch_token(
+		        	HSR_TOKEN_URL,
+		        	authorization_response=authorization_response)
+		getUserData(request, oauth)
+		clearMatches(request.user)
+		updateActivity(request)
+		for deck in request.user.profile.wishList.all():
+			findMatches(request, deck)
+		return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
+	except:
+	 	return render(request, "deckShare/updatedCollection.html", {"message": "There was an error."})
 
 @login_required
 def updateCollection(request):
