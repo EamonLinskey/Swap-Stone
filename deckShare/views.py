@@ -425,7 +425,7 @@ def matches(request):
 	# 			matches.append(deck)
 	# print(f"matches: {matches}")
 
-	return render(request, "deckShare/matches.html", {"matches": request.user.profile.matches.all()})
+	return render(request, "deckShare/matches.html", {"matches": Match.Match.objects.filter(Q(deck1.owner=request.user.profile) | Q(deck2.owner=request.user.profile))})
 
 @login_required
 def generous(request):
