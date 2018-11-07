@@ -398,7 +398,7 @@ def clearMatches(user):
 	user.save()
 
 def deleteAllMatches():
-	for match in matches.objects.all()
+	for match in Match.objects.all()
 		match.delete()
 
 
