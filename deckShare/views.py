@@ -28,12 +28,13 @@ SCOPE = ['collection:read']
 HSR_AUTHORIZATION_URL = 'https://hsreplay.net/oauth2/authorize/'
 HSR_TOKEN_URL = 'https://hsreplay.net/oauth2/token/'
 HSR_ACCOUNT_URL = 'https://hsreplay.net/api/v1/account/'
+MAX_USER_SEARCHES = 100
 #CLASSES = {heroes}
 
 
 #print(Profile.objects.all())
-mostRecentActivity = Profile.objects.all().aggregate(Max('latestActivity'))
-print(mostRecentActivity)
+#mostRecentActivity = Profile.objects.all().aggregate(Max('latestActivity'))
+#print(mostRecentActivity)
 
 # Used to make teh full colllection json file locally
 # should only be run when new cards are added to update file
@@ -282,14 +283,16 @@ def registered(request):
 
 def findMatches(request, newDeck):
 	# Looks through all owners to see who's collections can make the new deck
-	for owner in Profile.objects.all():
-		if newDeck.owner != owner and isMakable(newDeck, owner):
+	recentActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max'] - MAX_USER_SEARCHES
+	for i in range(334):
+		for owner in Profile.objects.filter(latestActivity__gte= recentActive):
+			if newDeck.owner != owner and isMakable(newDeck, owner):
 
-			# Looks through matching owners decks to see if current user 
-			# can make any of their decks with their own collections to complete the match
-			for deck in owner.wishList.all():
-				if isMakable(deck, newDeck.owner):
-					Match.objects.createMatch(deck, newDeck)
+				# Looks through matching owners decks to see if current user 
+				# can make any of their decks with their own collections to complete the match
+				for deck in owner.wishList.all():
+					if isMakable(deck, newDeck.owner):
+						Match.objects.createMatch(deck, newDeck)
 
 	# Returns the matches that the deck has
 	# return Match.objects.filter(Q(deck1=newDeck) | Q(deck2=newDeck))
