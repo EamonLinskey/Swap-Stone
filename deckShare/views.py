@@ -287,7 +287,7 @@ def findMatches(request, newDeck):
 	#recentActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max'] - MAX_USER_SEARCHES
 	recentActive = 0
 	for owner in Profile.objects.filter(latestActivity__gte= recentActive):
-		for i in range(334):
+		for i in range(1000):
 			if newDeck.owner != owner and isMakable(newDeck, owner):
 
 				# Looks through matching owners decks to see if current user 
