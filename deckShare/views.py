@@ -186,6 +186,7 @@ def index(request):
 
 @login_required
 def profile(request):
+	deleteAllMatches()
 	clearMatches(request.user)
 	# matchInfo = Match.objects.all()
 	# print(f"the matchs are {matchInfo}")
@@ -284,7 +285,7 @@ def registered(request):
 def findMatches(request, newDeck):
 	# Looks through all owners to see who's collections can make the new deck
 	recentActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max'] - MAX_USER_SEARCHES
-	for i in range(334):
+	for i in range(167):
 		for owner in Profile.objects.filter(latestActivity__gte= recentActive):
 			if newDeck.owner != owner and isMakable(newDeck, owner):
 
@@ -394,8 +395,12 @@ def clearMatches(user):
 	print(user.profile.matches.all())
 	for match in user.profile.matches.all():
 		match.delete()
-		print("cleared")
 	user.save()
+
+def deleteAllMatches():
+	for match in matches.objects.all()
+		match.delete()
+
 
 @login_required
 def matches(request):
