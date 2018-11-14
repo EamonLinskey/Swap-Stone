@@ -17,9 +17,13 @@ import datetime
 import time
 import json
 import requests
+import random
+
+from swapstone.settings_secret import BULK_USER_PASS
 
 # globals
 DECK_SIZE = 30
+WISH_LIMIT = 10
 API_TIMEOUT_SECS = 120
 CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
@@ -29,6 +33,9 @@ HSR_AUTHORIZATION_URL = 'https://hsreplay.net/oauth2/authorize/'
 HSR_TOKEN_URL = 'https://hsreplay.net/oauth2/token/'
 HSR_ACCOUNT_URL = 'https://hsreplay.net/api/v1/account/'
 MAX_USER_SEARCHES = 100
+# These are the designations used by the API for standard legal sets. I didn't pick the (poor) names
+# Should be updated on release of new sets or on rotataion
+STANDARD_SETS = ["CORE", "EXPERT1" "UNGORO", "ICECROWN", "LOOTAPALOOZA", "GILNEAS", "BOOMSDAY"]
 #CLASSES = {heroes}
 
 
@@ -51,20 +58,23 @@ def makeFullCollFile(fileName):
 # Builds a dictionary of all cards from the hearthstone json file with their classes and names by ids
 def buildFullColl(datafile):
     
-    # Read the API json file of cards
-    f = open(datafile, "r")
-    fullCollectionRaw = json.loads(f.read())
+	# Read the API json file of cards
+	f = open(datafile, "r")
+	fullCollectionRaw = json.loads(f.read())
     
-    # The API for some reason strores the Heros as cards but for my purposes they should not be included
-    # so I filtered them into a differernt dict
-    fullCollectionClean = {}
-    heroes = {}
-    for card in fullCollectionRaw:
-        if card['id'][0:4] != "HERO":
-            fullCollectionClean[card['dbfId']] = {'name': card['name'],'class': card['cardClass']}
-        else:
-            heroes[card['dbfId']] = {'name': card['name'],'class': card['cardClass']}
-    return fullCollectionClean, heroes
+	# The API for some reason strores the Heros as cards but for my purposes they should not be included
+	# so I filtered them into a differernt dict
+	fullCollectionClean = {}
+	heroes = {}
+	for card in fullCollectionRaw:
+		deckFormat = 'wild'
+		if card["set"] in STANDARD_SETS:
+			deckFormat = 'standard'
+		if card['id'][0:4] != "HERO":
+			fullCollectionClean[card['dbfId']] = {'name': card['name'],'class': card['cardClass'], 'format':deckFormat}
+		else:
+			heroes[card['dbfId']] = {'name': card['name'],'class': card['cardClass'], 'format':deckFormat}
+	return fullCollectionClean, heroes
 
 def IsValidDeckCode(deckString):
     # Makes sure deckstring is syntactically valid
@@ -169,8 +179,9 @@ def refreshHSRAccess(request):
 		token = oauth.refresh_token(HSR_TOKEN_URL, **clientInfo)
 		getUserData(request, oauth)
 		clearMatches(request.user)
-		recentActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max'] - MAX_USER_SEARCHES
+		#recentActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max'] - MAX_USER_SEARCHES
 		recentActOwners = Profile.objects.filter(latestActivity__gte= recentActive)
+		recentActOwners = Profile.objects.all()
 		for deck in request.user.profile.wishList.objects.all():
 			findMatches(request, deck, recentActOwners)
 		return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
@@ -180,7 +191,42 @@ def refreshHSRAccess(request):
 
 # More globals that require a function to be set
 FULL_COLLECTION, HEROES = buildFullColl('static/deckShare/json/FullCollection.json')
-#print(FULL_COLLECTION)
+
+# splits FULL_COLLECTION up among classes for building legal decks more easily
+def cardsByClass():
+	classCards = {"MAGE":{}, "ROGUE":{}, "WARLOCK":{}, "WARRIOR":{}, "PALADIN":{}, "SHAMAN":{}, "PRIEST":{}, "HUNTER":{}, "DRUID":{}, "NEUTRAL":{}}
+	standardClassCards = {"MAGE":{}, "ROGUE":{}, "WARLOCK":{}, "WARRIOR":{}, "PALADIN":{}, "SHAMAN":{}, "PRIEST":{}, "HUNTER":{}, "DRUID":{}, "NEUTRAL":{}}
+	
+	# Seperates main dic into a dict of dicts by class
+	for cardId,cardInfo in FULL_COLLECTION.items():
+		classCards[cardInfo['class']][cardId] = cardInfo
+
+		# makes a seprate dict of dicts for standard only cards
+		if cardInfo["format"] == "standard":
+			standardClassCards[cardInfo['class']][cardId] = cardInfo
+	
+	return {"allClass": classCards, "standardClass":standardClassCards}
+
+
+def genRandDeck(standardClassCards):
+	# list of hero ids for the 9 starting heros for each class for deck construction
+	HeroIds = {"MAGE":637, "ROGUE":930, "WARLOCK":893, "WARRIOR":7, "PALADIN":671, "SHAMAN":1066, "PRIEST":813, "HUNTER":31, "DRUID":274}
+	deckClass = random.choice(list(HeroIds))
+
+	cards = list(standardClassCards[deckClass])	
+	# Shuffle list then sample first 30 to simulate random selection without replacement
+	random.shuffle(cards)
+
+	# zip list with number of copies of each card so that deckstring function can make deck string
+	cards = list(zip(cards[0:DECK_SIZE], [1]*DECK_SIZE))
+
+	# Create decking using Hearthsone module
+	deck = DeckHearth()
+	deck.heroes = [HeroIds[deckClass]]  # Garrosh Hellscream
+	deck.format = FormatType.FT_STANDARD
+	deck.cards = cards
+	return { "deckstring": deck.as_deckstring, "class":deckClass}
+
 
 # Create your views here.
 def index(request):
@@ -328,6 +374,7 @@ def wishList(request):
 					updateActivity(request)
 					recentActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max'] - MAX_USER_SEARCHES
 					recentActOwners = Profile.objects.filter(latestActivity__gte= recentActive)
+					#recentActOwners = Profile.objects.all()
 					findMatches(request, deck, recentActOwners)
 				else:
 					context["message"] = "You already have added this code"
@@ -376,6 +423,7 @@ def loadedCollection(request):
 	updateActivity(request)
 	recentActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max'] - MAX_USER_SEARCHES
 	recentActOwners = Profile.objects.filter(latestActivity__gte= recentActive)
+	#recentActOwners = Profile.objects.all()
 	for deck in request.user.profile.wishList.all():
 		findMatches(request, deck, recentActOwners)
 	return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
@@ -425,8 +473,9 @@ def matches(request):
 	# 			matches.append(deck)
 	# print(f"matches: {matches}")
 	
-
-	return render(request, "deckShare/matches.html", {"matches": Match.objects.filter(Q(deck1__owner=request.user.profile) | Q(deck2__owner=request.user.profile))})
+	#matches = Match.objects.filter(Q(deck1__owner=request.user.profile) | Q(deck2__owner=request.user.profile))
+	matches = Match.objects.filter(deck2__owner=request.user.profile)
+	return render(request, "deckShare/matches.html", {"matches": matches})
 
 @login_required
 def generous(request):
@@ -438,4 +487,47 @@ def generous(request):
 				generous.append(deck)
 	return render(request, "deckShare/generous.html", {"generous": generous})
 
+@login_required
+def tests(request):
+	bulkTestUsers = User.objects.filter(first_name="bulktest")
+	bulkTestUsers.delete()
 
+	bulkTestDecks = Deck.objects.filter(isBulkTest=True)
+	bulkTestDecks.delete()
+
+
+	testUsers = []
+	for i in range(1000):
+		username = 'bulktest' + str(i)
+		email = username + '@email.com'
+		testUsers.append(User(username=username, email=email, password=BULK_USER_PASS, first_name="bulktest"))
+	User.objects.bulk_create(testUsers)
+	
+	exampleUser = User.objects.get(username="EamonLinskey")
+	exampleProfile = Profile.objects.get(user=exampleUser)
+	collection = exampleProfile.collection
+
+	testProfiles = []
+	for i, user in enumerate(testUsers):
+		blizzTag = 'bulktest' + str(i)
+		testProfiles.append(Profile(user=user, blizzTag=blizzTag, collection=collection, latestActivity=i))
+
+	profiles = Profile.objects.bulk_create(testProfiles)
+
+
+	classCards = cardsByClass()
+	standardClassCards = classCards["standardClass"]
+
+	for profile in profiles:
+		deckObjs = []
+		for i in range(WISH_LIMIT):
+			randDeck = genRandDeck(standardClassCards)
+			name = profile.blizzTag+ "'s " + str(i)
+			deckObj = Deck(owner = profile, name = name, deckString = randDeck["deckstring"], deckClass = randDeck["class"], maxMatchIdChecked = 0, isBulkTest = True)
+			deckObjs.append(deckObj)
+		Deck.objects.bulk_create(deckObjs)
+		profile.wishList.add(*deckObjs)
+
+	return render(request, "deckShare/tests.html")
+
+	

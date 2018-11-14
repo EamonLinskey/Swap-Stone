@@ -31,7 +31,7 @@ class Profile(models.Model):
 	lastUpdateCollection = models.CharField(max_length=100, blank=True)
 	time = models.FloatField(blank=False, default = 0)
 	collection = JSONField(blank=True, null=True)
-	latestActivity = models.IntegerField()
+	latestActivity = models.IntegerField(blank=True, null=True)
 	def __str__(self):
 		return f"{self.user.username}'s profile"
 
@@ -51,6 +51,7 @@ class Deck(models.Model):
 	deckString = models.CharField(max_length=200)
 	deckClass = models.CharField(max_length=20)
 	maxMatchIdChecked = models.IntegerField()
+	isBulkTest = models.BooleanField(default=False)
 	objects = DeckManager()
 	def __str__(self):
 		return f"{self.name} deck object"

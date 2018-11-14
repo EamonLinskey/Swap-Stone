@@ -8,18 +8,26 @@
 			<table class="table table-striped">
 			<thead>
 				<tr>
-					<th scope="col">Deck Name</th>
-					<th scope="col">Deck string</th>
+					<th scope="col">Their Deck</th>
+					<th scope="col">Your Deck</th>
 					<th scope="col">Share info?</th>
 				</tr>
 			</thead>
 			<tbody>
-				{% for deck in matches %}
-				<tr>
-					<td>{{deck1}}</td>
-					<td>{{deck2}}</td>
-					<td>Share! {{deck1.owner.blizzTag}}</td>
-				</tr>
+				{% for match in matches %}
+					{% if match.deck1.owner == user.profile %}}
+						<tr>
+							<td>{{match.deck2.name}}</td>
+							<td>{{match.deck1.name}}</td>
+							<td>Share! {{match.deck2.owner.blizzTag}}</td>
+						</tr>
+					{% else %}
+						<tr>
+							<td>{{match.deck1.name}}</td>
+							<td>{{match.deck2.name}}</td>
+							<td>Share! {{match.deck1.owner.blizzTag}}</td>
+						</tr>
+					{% endif %}
 				{% endfor %}
 			</tbody>
 		</table>

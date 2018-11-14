@@ -85,14 +85,18 @@ WSGI_APPLICATION = 'swapstone.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
+
+from swapstone.settings_secret import DATABASES
 
 
+
+#DATABASE_URL = 'postgres://oiixplvfrxvzak:312d9176c7b8bcee2925d64ad230c89b92b659666cb10bce27317bbcc86b53bf@ec2-54-243-46-32.compute-1.amazonaws.com:5432/drnpci1fjgn59'
 db_from_env = dj_database_url.config()
 DATABASES['default'].update(db_from_env)
 
