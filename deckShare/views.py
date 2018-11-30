@@ -10,7 +10,7 @@ from django.db.models import Q, Max
 from requests_oauthlib import OAuth2Session
 from hearthstone.deckstrings import Deck as DeckHearth
 from hearthstone.enums import FormatType
-from .models import Deck, Profile, Match
+from .models import Deck, Profile
 import re
 import os
 import datetime
@@ -23,7 +23,7 @@ from swapstone.settings_secret import BULK_USER_PASS
 
 # globals
 DECK_SIZE = 30
-WISH_LIMIT = 10
+WISH_LIMIT = 5
 API_TIMEOUT_SECS = 120
 CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
@@ -33,6 +33,7 @@ HSR_AUTHORIZATION_URL = 'https://hsreplay.net/oauth2/authorize/'
 HSR_TOKEN_URL = 'https://hsreplay.net/oauth2/token/'
 HSR_ACCOUNT_URL = 'https://hsreplay.net/api/v1/account/'
 MAX_USER_SEARCHES = 100
+MATCH_PER_PAGE = 10
 # These are the designations used by the API for standard legal sets. I didn't pick the (poor) names
 # Should be updated on release of new sets or on rotataion
 STANDARD_SETS = ["CORE", "EXPERT1" "UNGORO", "ICECROWN", "LOOTAPALOOZA", "GILNEAS", "BOOMSDAY"]
@@ -46,10 +47,9 @@ STANDARD_SETS = ["CORE", "EXPERT1" "UNGORO", "ICECROWN", "LOOTAPALOOZA", "GILNEA
 # Used to make teh full colllection json file locally
 # should only be run when new cards are added to update file
 def makeFullCollFile(fileName):
-	# Update to the version number corresponing to the most recent release
-	version = "25770"
+	# As of Nov 29, 18 version is 27641 but latest should automatically fetch th most recent version corresponinf to current expansion
 
-	dataResponse = requests.get(f"https://api.hearthstonejson.com/v1/{version}/enUS/cards.collectible.json")
+	dataResponse = requests.get(f"https://api.hearthstonejson.com/v1/latest/enUS/cards.collectible.json")
 	fullCollectionRaw = json.loads(dataResponse.text)
     
 	with open(fileName, 'w') as outfile:
@@ -76,7 +76,7 @@ def buildFullColl(datafile):
 			heroes[card['dbfId']] = {'name': card['name'],'class': card['cardClass'], 'format':deckFormat}
 	return fullCollectionClean, heroes
 
-def IsValidDeckCode(deckString):
+def IsValidDeckString(deckString):
     # Makes sure deckstring is syntactically valid
 	try:
 		deck = DeckHearth.from_deckstring(deckString)
@@ -119,8 +119,6 @@ def isMakable(deck, profile):
 		return True
 	except:
 		return False
-
-
 
 
 # Returns time diffrenece from last update in seconds
@@ -331,6 +329,9 @@ def registered(request):
 		return HttpResponseRedirect(reverse("index"))
 
 def findMatches(request, newDeck, recentActOwners):
+	timer = time.time()
+	print("timer has started")
+
 	matches = []
 	# Looks through all owners to see who's collections can make the new deck
 	for owner in recentActOwners:
@@ -340,11 +341,21 @@ def findMatches(request, newDeck, recentActOwners):
 			for deck in owner.wishList.all():
 				if isMakable(deck, newDeck.owner):
 					#Match.objects.createMatch(deck, newDeck)
-					matches.append(Match(deck1=deck, deck2=newDeck))
-	
-	# Create new matches and associate them with the user
-	matchObjs = Match.objects.bulk_create(matches)
-	request.user.profile.matches.add(*matchObjs)
+					matches.append(owner)
+					break
+	print(f"Decks Checked:{int(time.time() - timer)} seconds have passed")
+	# 		matches.append(MatchList(profile=owner))
+
+					
+
+	# # Create new matches and associate them with the user
+	# matchListObjs = MatchList.objects.bulk_create(matches)
+	# for matchList, decksList in zip(matchListObjs, decksListList):
+	# 	print(f"the decklists are {decksList}")
+	# 	matchList.add(*decksList)
+
+	request.user.profile.matches.add(*matches)
+	print(f"Mathces added: {int(time.time() - timer)} seconds have passed")
 
 @login_required
 def wishList(request):
@@ -357,32 +368,32 @@ def wishList(request):
 			context["wishList"] = request.user.profile.wishList.all()
 			return render(request, "deckShare/wishList.html", context)
 	else:
-		deckName, deckCode = escape(request.POST.get("deckName")), escape(request.POST.get("deckCode"))
-		if IsValidDeckCode(deckCode):
+		deckName, deckString = escape(request.POST.get("deckName")), escape(request.POST.get("deckCode"))
+		if IsValidDeckString(deckString):
 			if len(deckName) > 50 or len(deckName) <= 0:
 				context["message"] = "Your deck Name must be less than 50 characters and cannot be blank"
 			else:
 				wishList = request.user.profile.wishList.all()
-				if len(wishList.filter(deckString=deckCode)) == 0:
-					deckObj = DeckHearth.from_deckstring(deckCode)
+				if len(wishList.filter(deckString=deckString)) == 0:
+					deckObj = DeckHearth.from_deckstring(deckString)
 					heroId = deckObj.heroes[0]
 					deckClass = HEROES[heroId]["class"].capitalize()
-					deck = Deck.objects.createDeck(deckName, deckCode, deckClass, request.user.profile)
+					deck = Deck(name = deckName, deckString= deckString, deckClass=deckClass, maxMatchIdChecked = 0, owner =request.user.profile)
 					deck.save()	
 					request.user.profile.wishList.add(deck)
 					request.user.save()
-					updateActivity(request)
-					recentActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max'] - MAX_USER_SEARCHES
-					recentActOwners = Profile.objects.filter(latestActivity__gte= recentActive)
-					#recentActOwners = Profile.objects.all()
+					#updateActivity(request)
+					#recentActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max'] - MAX_USER_SEARCHES
+					#recentActOwners = Profile.objects.filter(latestActivity__gte= recentActive)
+					recentActOwners = Profile.objects.all()
 					findMatches(request, deck, recentActOwners)
 				else:
 					context["message"] = "You already have added this code"
-					context["deckCode"] = deckCode
+					context["deckCode"] = deckString
 					context["deckName"] = deckName
 		else:
 			context["message"] = "Your deck code is not valid"
-			context["deckCode"] = deckCode
+			context["deckCode"] = deckString
 			context["deckName"] = deckName
 	
 	context["wishList"] = request.user.profile.wishList.all()
@@ -423,7 +434,7 @@ def loadedCollection(request):
 	updateActivity(request)
 	recentActive = Profile.objects.all().aggregate(Max('latestActivity'))['latestActivity__max'] - MAX_USER_SEARCHES
 	recentActOwners = Profile.objects.filter(latestActivity__gte= recentActive)
-	#recentActOwners = Profile.objects.all()
+	recentActOwners = Profile.objects.all()
 	for deck in request.user.profile.wishList.all():
 		findMatches(request, deck, recentActOwners)
 	return render(request, "deckShare/updatedCollection.html", {"message": "You have sucessfully updated your collection"})
@@ -456,7 +467,7 @@ def deleteAllMatches():
 
 
 @login_required
-def matches(request):
+def matches(request, page=1):
 	# potentialMatches = []
 	# matches = []
 	# profile = request.user.profile
@@ -472,10 +483,54 @@ def matches(request):
 	# 		if isMakable(deck, owner):
 	# 			matches.append(deck)
 	# print(f"matches: {matches}")
+	# print("starting filter")
+	# matches = Match.objects.filter(Q(profile1=request.user.profile.matches) | Q(profile2=request.user.profile))
+	# print("filtering complete")
+	# print("starting owners")
+
+	# owners = set()
+	# for match in matches:
+	# 	owners.add(match.deck1.owner)
+	# 	owners.add(match.deck2.owner)
+	#matches = Match.objects.filter(deck2__owner=request.user.profile)
+	# print("owners complete")
+
+
+	#print("filtering complete")
+
+	# indexes for pagation
+	end = page * MATCH_PER_PAGE
+	start = end - MATCH_PER_PAGE 
+
+	# Get the matches within the indexes
+	matches = request.user.profile.matches.all()[start:end]
 	
-	#matches = Match.objects.filter(Q(deck1__owner=request.user.profile) | Q(deck2__owner=request.user.profile))
-	matches = Match.objects.filter(deck2__owner=request.user.profile)
-	return render(request, "deckShare/matches.html", {"matches": matches})
+	desiredByUserList = []
+	desiredByMatchList = []
+
+	for match in matches:
+		desiredByUser = []
+		desiredByMatch = []
+
+		for deck in match.wishList.all():
+			if isMakable(deck, request.user.profile):
+				desiredByUser.append({"name": deck.name, "deckString": deck.deckString} )
+		desiredByUserList.append(desiredByUser)
+
+		for deck in request.user.profile.wishList.all():
+			if isMakable(deck, match):
+				desiredByMatch.append({"name": deck.name, "deckString": deck.deckString})
+		desiredByMatchList.append(desiredByMatch)
+
+	print(f"desiredByUserList: {desiredByUserList}")
+	print(f"desiredByMatchList: {desiredByMatchList}")
+	print(f"the type of matches is {type(matches)}")
+	matches = list(zip(matches, desiredByUserList, desiredByMatchList))
+	print(matches)
+	# print(f"queryset: {matches}")
+	# print(f"first 5: {matches[:5]}")
+	# print(f"6-10: {matches[5:10]}")
+	return render(request, "deckShare/matches.html", {"matches": matches})#, "desiredByUser": desiredByUserList, "desiredByMatch": desiredByMatchList})#, "owners": list(owners)})
 
 @login_required
 def generous(request):
@@ -489,6 +544,7 @@ def generous(request):
 
 @login_required
 def tests(request):
+
 	bulkTestUsers = User.objects.filter(first_name="bulktest")
 	bulkTestUsers.delete()
 
@@ -497,7 +553,7 @@ def tests(request):
 
 
 	testUsers = []
-	for i in range(1000):
+	for i in range(500):
 		username = 'bulktest' + str(i)
 		email = username + '@email.com'
 		testUsers.append(User(username=username, email=email, password=BULK_USER_PASS, first_name="bulktest"))

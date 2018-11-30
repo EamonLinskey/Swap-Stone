@@ -6,10 +6,10 @@
 <script></script>
 <div class="background-containter">
 	<div class="heading">Well Met, {{user.username}}</div>
-	<div class="text-center">{{message}}</div>
+	<div class="text-center message">{{message}}</div>
 	<div class="container">
 		<div class="addDeck">
-			<form action="/profile/wishList" method="post">
+			<form id="submitForm" action="/profile/wishList" method="post">
 				{% csrf_token %}
 				<input type="text" name="deckName" class="deckName" placeholder="Deck Name" value="{{deckName}}"required>
 				<input type="text" name="deckCode" class="deckCode" placeholder="Deck Code" value="{{deckCode}}" required>

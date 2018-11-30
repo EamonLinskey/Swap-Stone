@@ -5,26 +5,26 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 # Create your models here.
-class DeckManager(models.Manager):
-    def createDeck(self, name, deckString, deckClass, owner):
-        deck = self.create(name=name, deckString=deckString, deckClass=deckClass, owner=owner, maxMatchIdChecked=0)
-        return deck
+# class DeckManager(models.Manager):
+#     def createDeck(self, name, deckString, deckClass, owner):
+#         deck = self.create(name=name, deckString=deckString, deckClass=deckClass, owner=owner, maxMatchIdChecked=0)
+#         return deck
 
-class MatchManager(models.Manager):
-    def createMatch(self, deck1, deck2):
-        match = self.create(deck1=deck1, deck2=deck2)
-        return match
+# class MatchManager(models.Manager):
+#     def createMatch(self, deck1, deck2):
+#         match = self.create(deck1=deck1, deck2=deck2)
+#         return match
 
-class GenerousManager(models.Manager):
-    def createGenerous(self, deck):
-        Generous = self.create(deck=deck)
-        return Generous
+# class GenerousManager(models.Manager):
+#     def createGenerous(self, deck):
+#         Generous = self.create(deck=deck)
+#         return Generous
 
 class Profile(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
 	blizzTag = models.CharField(max_length=100, blank=True)
 	wishList = models.ManyToManyField('Deck', blank=True)
-	matches = models.ManyToManyField('Match', blank=True)
+	matches = models.ManyToManyField('self', blank=True)
 	generous = models.ManyToManyField('Generous', blank=True)
 	state = models.CharField(max_length=100, blank=True)
 	token = JSONField(blank=True, null=True)
@@ -52,21 +52,13 @@ class Deck(models.Model):
 	deckClass = models.CharField(max_length=20)
 	maxMatchIdChecked = models.IntegerField()
 	isBulkTest = models.BooleanField(default=False)
-	objects = DeckManager()
+	#objects = DeckManager()
 	def __str__(self):
 		return f"{self.name} deck object"
-
-class Match(models.Model):
-	deck1 = models.ForeignKey(Deck, on_delete=models.CASCADE, related_name="deck1")
-	deck2 = models.ForeignKey(Deck, on_delete=models.CASCADE, related_name="deck2")
-	objects = MatchManager()
-	def __str__(self):
-		return f"Match of {self.deck1.name} and {self.deck2.name}"
 
 
 class Generous(models.Model):
 	deck = models.ForeignKey(Deck, on_delete=models.CASCADE)
-	objects = GenerousManager()
+	#objects = GenerousManager()
 	def __str__(self):
 		return f"{deck.name}"
-
