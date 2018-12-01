@@ -1,6 +1,8 @@
 {% extends "deckShare/base.html" %}
 
 {% block body %}
+{% load static %}
+<script src= "{% static "deckShare/scripts/bundle.js" %}"></script>
 <div class="background-containter">
 	<div class="heading">Well Met, {{user.username}}</div>
 	<div class="container">
@@ -34,12 +36,12 @@
 						<td>{{match.user.username}}</td>
 						<td>
 							{% for deck in desiredByUser %}
-								<ul class="{{deck.deckString}}">{{deck.name}}</ul>
+								<ul class="deck" id="{{deck.deckString}}">{{deck.name}}</ul>
 							{% endfor %}
 						</td>
 						<td>
 							{% for deck in desiredByMatch %}
-								<ul class="{{deck.deckString}}">{{deck.name}}</ul>
+								<ul class="deck" id="{{deck.deckString}}">{{deck.name}}</ul>
 							{% endfor %}
 						</td>
 					</tr>
@@ -47,9 +49,12 @@
 			</tbody>
 		</table>
 		</div>
+		<div class="deckToolTip">
+			<table class="cardList">
+			</table>
+		</div>
 	</div>
 </div>
-
 
 
 

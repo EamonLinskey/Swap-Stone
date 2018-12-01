@@ -44,16 +44,33 @@ STANDARD_SETS = ["CORE", "EXPERT1" "UNGORO", "ICECROWN", "LOOTAPALOOZA", "GILNEA
 #mostRecentActivity = Profile.objects.all().aggregate(Max('latestActivity'))
 #print(mostRecentActivity)
 
+def makeOutFile(fileName, obj):
+	with open(fileName, 'w') as outfile:
+		json.dump(obj, outfile)
+
 # Used to make teh full colllection json file locally
 # should only be run when new cards are added to update file
-def makeFullCollFile(fileName):
+def makeFullCollFile(fileNames):
 	# As of Nov 29, 18 version is 27641 but latest should automatically fetch th most recent version corresponinf to current expansion
-
 	dataResponse = requests.get(f"https://api.hearthstonejson.com/v1/latest/enUS/cards.collectible.json")
+	
 	fullCollectionRaw = json.loads(dataResponse.text)
-    
-	with open(fileName, 'w') as outfile:
-		json.dump(fullCollectionRaw, outfile)
+	fullCollectionEdited = {}
+	hereos = {}
+
+	for card in fullCollectionRaw:
+		if "cost" in card:
+			fullCollectionEdited[card["dbfId"]] = {"name": card["name"], "cost": card["cost"]}
+		elif card["type"] == "HERO":
+			hereos[card["dbfId"]] = card["cardClass"]
+
+	for file, d in zip(fileNames, [fullCollectionRaw, fullCollectionEdited, hereos]):
+		makeOutFile(file, d)
+
+	
+
+
+#makeFullCollFile(["FullCollection.json", "EditedCollection.json", "Hereos.json"])
 
 # Builds a dictionary of all cards from the hearthstone json file with their classes and names by ids
 def buildFullColl(datafile):
@@ -522,11 +539,11 @@ def matches(request, page=1):
 				desiredByMatch.append({"name": deck.name, "deckString": deck.deckString})
 		desiredByMatchList.append(desiredByMatch)
 
-	print(f"desiredByUserList: {desiredByUserList}")
-	print(f"desiredByMatchList: {desiredByMatchList}")
-	print(f"the type of matches is {type(matches)}")
+	#print(f"desiredByUserList: {desiredByUserList}")
+	#print(f"desiredByMatchList: {desiredByMatchList}")
+	#print(f"the type of matches is {type(matches)}")
 	matches = list(zip(matches, desiredByUserList, desiredByMatchList))
-	print(matches)
+	#print(matches)
 	# print(f"queryset: {matches}")
 	# print(f"first 5: {matches[:5]}")
 	# print(f"6-10: {matches[5:10]}")
