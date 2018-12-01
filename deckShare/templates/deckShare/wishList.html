@@ -3,6 +3,7 @@
 {% block body %}
 {% load static %}
 <script src= "{% static "deckShare/scripts/wishList.js" %}"></script>
+<script src= "{% static "deckShare/scripts/bundle.js" %}"></script>
 <script></script>
 <div class="background-containter">
 	<div class="heading">Well Met, {{user.username}}</div>
@@ -26,22 +27,24 @@
 		<table class="table table-striped">
 			<thead>
 				<tr>
-					<th scope="col">Name</th>
+					<th scope="col">Deck</th>
 					<th scope="col">Class</th>
-					<th scope="col">Deck Code</th>
 					<th scope="col">Delete</th>
 				</tr>
 			</thead>
 			<tbody>
 				{% for deck in wishList %}
 				<tr>
-					<td>{{deck.name}}</td>
+					<td class="deck" id={{deck.deckString}}>{{deck.name}}</td>
 					<td>{{deck.deckClass}}</td>
-					<td>{{deck.deckString}}</td>
 					<td><img class="trash" id="{{deck.id}}" src={% static "deckShare/images/trash.png" %} alt="Delete"></td>
 				</tr>
 				{% endfor %}
 			</tbody>
+		</table>
+	</div>
+	<div class="deckToolTip">
+		<table class="cardList">
 		</table>
 	</div>
 </div>

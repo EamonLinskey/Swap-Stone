@@ -1,6 +1,8 @@
 {% extends "deckShare/base.html" %}
 
 {% block body %}
+{% load static %}
+<script src= "{% static "deckShare/scripts/bundle.js" %}"></script>
 <div class="background-containter">
 	<div class="heading">Well Met, {{user.username}}</div>
 	<div class="container">
@@ -10,22 +12,24 @@
 				<tr>
 					<th scope="col">Deck</th>
 					<th scope="col">Class</th>
-					<th scope="col">String</th>
 					<th scope="col">Share info?</th>
 				</tr>
 			</thead>
 			<tbody>
 				{% for deck in generous %}
 				<tr>
-					<td>{{deck.name}}</td>
+					<td class="deck" id="{{deck.deckString}}">{{deck.name}}</td>
 					<td>{{deck.deckClass}}</td>
-					<td>{{deck.deckString}}</td>
 					<td>{{deck.owner.blizzTag}}</td>
 				</tr>
 				{% endfor %}
 			</tbody>
 		</table>
 		</div>
+	</div>
+	<div class="deckToolTip">
+		<table class="cardList">
+		</table>
 	</div>
 </div>
 

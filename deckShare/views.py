@@ -34,6 +34,7 @@ HSR_TOKEN_URL = 'https://hsreplay.net/oauth2/token/'
 HSR_ACCOUNT_URL = 'https://hsreplay.net/api/v1/account/'
 MAX_USER_SEARCHES = 100
 MATCH_PER_PAGE = 10
+MAX_GENEROUS = 10
 # These are the designations used by the API for standard legal sets. I didn't pick the (poor) names
 # Should be updated on release of new sets or on rotataion
 STANDARD_SETS = ["CORE", "EXPERT1" "UNGORO", "ICECROWN", "LOOTAPALOOZA", "GILNEAS", "BOOMSDAY"]
@@ -552,11 +553,24 @@ def matches(request, page=1):
 @login_required
 def generous(request):
 	generous = []
-	for deck in Deck.objects.all():
+	decks = Deck.objects.all()
+	numDecks = decks.count()
+	randomIndexes = random.sample(range(0, numDecks), 50)
+
+	# I use random indexes here because it would be too time intensive 
+	# to check all possible matches and too space intensive to store all 
+	# matches so the compromise is to randomly sample decks until either 
+	# their are 10 matches or too many tries have occured. Randomly sampling 
+	# indexes allows for us to get items from teh quey set without fully
+	# evaluating it saving time
+	for index in randomIndexes:
+		deck = decks[index]
 		profile = request.user.profile
 		if deck.owner != profile:
 			if isMakable(deck, request.user.profile):
 				generous.append(deck)
+		if len(generous) >= MAX_GENEROUS:
+			break
 	return render(request, "deckShare/generous.html", {"generous": generous})
 
 @login_required
@@ -596,7 +610,7 @@ def tests(request):
 		for i in range(WISH_LIMIT):
 			randDeck = genRandDeck(standardClassCards)
 			name = profile.blizzTag+ "'s " + str(i)
-			deckObj = Deck(owner = profile, name = name, deckString = randDeck["deckstring"], deckClass = randDeck["class"], maxMatchIdChecked = 0, isBulkTest = True)
+			deckObj = Deck(owner = profile, name = name, deckString = randDeck["deckstring"], deckClass = randDeck["class"].capitalize(), maxMatchIdChecked = 0, isBulkTest = True)
 			deckObjs.append(deckObj)
 		Deck.objects.bulk_create(deckObjs)
 		profile.wishList.add(*deckObjs)
