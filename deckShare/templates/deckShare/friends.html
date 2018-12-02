@@ -3,60 +3,117 @@
 {% block body %}
 {% load static %}
 <script src= "{% static "deckShare/scripts/bundle.js" %}"></script>
+<script src= "{% static "deckShare/scripts/friends.js" %}"></script>
 <div class="background-containter">
 	<div class="heading">Well Met, {{user.username}}</div>
 	<div class="container">
 		<div class="Matches">
-			<table class="table table-striped">
-			<thead>
-				<tr>
-					<th scope="col">Friend</th>
-					<th scope="col">They can lend You</th>
-					<th scope="col">You can lend Them</th>
-				</tr>
-			</thead>
-			<tbody>
-				<!-- {% for match in matches %}
-					{% if match.deck1.owner == user.profile %}}
-						<tr>
-							<td>{{match.deck2.name}}</td>
-							<td>{{match.deck1.name}}</td>
-							<td>Share! {{match.deck2.owner.blizzTag}}</td>
-						</tr>
-					{% else %}
-						<tr>
-							<td>{{match.deck1.name}}</td>
-							<td>{{match.deck2.name}}</td>
-							<td>Share! {{match.deck1.owner.blizzTag}}</td>
-						</tr>
-					{% endif %}
-				{% endfor %} -->
-				{% for friend, desiredByUser, desiredByFriend in friends %}
+			{% if offered|length > 0%}
+				<table class="table table-striped">
+				<thead>
 					<tr>
-						<td>
-							<div>{{friend.user.username}}</div>
-							<div><button id="{{friend.id}}" class="btn btn-warning requestFriends">Delete Friend</button></div>
-						</td>
-						<td>
-							{% for deck in desiredByFriend %}
-								<ul class="deck" id="{{deck.deckString}}">{{deck.name}}</ul>
-							{% endfor %}
-						</td>
-						<td>
-							{% for deck in desiredByUser %}
-								<ul class="deck" id="{{deck.deckString}}">{{deck.name}}</ul>
-							{% endfor %}
-						</td>
+						<th scope="col">Friend Request</th>
+						<th scope="col">They can lend You</th>
+						<th scope="col">You can lend Them</th>
 					</tr>
-				{% endfor %}
-			</tbody>
-		</table>
+				</thead>
+				<tbody>
+					{% for friend, desiredByUser, desiredByFriend in offered %}
+						<tr>
+							<td>
+								<div>{{friend.user.username}}</div>
+								<div><button id="{{friend.id}}" class="btn btn-success acceptFriends">Accept Friend</button></div>
+							</td>
+							<td>
+								{% for deck in desiredByFriend %}
+									<ul class="deck" id="{{deck.deckString}}">{{deck.name}}</ul>
+								{% endfor %}
+							</td>
+							<td>
+								{% for deck in desiredByUser %}
+									<ul class="deck" id="{{deck.deckString}}">{{deck.name}}</ul>
+								{% endfor %}
+							</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			{% endif %}
+			{% if friends|length > 0 %}
+				<table class="table table-striped">
+				<thead>
+					<tr>
+						<th scope="col">Friend</th>
+						<th scope="col">They can lend You</th>
+						<th scope="col">You can lend Them</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for friend, desiredByUser, desiredByFriend in friends %}
+						<tr>
+							<td>
+								<div>{{friend.user.blizzTag}}</div>
+								<div><button id="{{friend.id}}" class="btn btn-warning deleteFriends">Delete Friend</button></div>
+							</td>
+							<td>
+								{% for deck in desiredByFriend %}
+									<ul class="deck" id="{{deck.deckString}}">{{deck.name}}</ul>
+								{% endfor %}
+							</td>
+							<td>
+								{% for deck in desiredByUser %}
+									<ul class="deck" id="{{deck.deckString}}">{{deck.name}}</ul>
+								{% endfor %}
+							</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			{% else %}
+				<div>You dont currently have any friends. </div>
+			{% endif %}
+			{% if awaiting|length > 0 %}
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th scope="col">Awaiting Response</th>
+							<th scope="col">They could lend You</th>
+							<th scope="col">You could lend Them</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for friend, desiredByUser, desiredByFriend in awaiting %}
+							<tr>
+								<td>
+									<div>{{friend.user.username}}</div>
+									<div>You have already sent a request and are awaiting a response</div>
+								</td>
+								<td>
+									{% for deck in desiredByFriend %}
+										<ul class="deck" id="{{deck.deckString}}">{{deck.name}}</ul>
+									{% endfor %}
+								</td>
+								<td>
+									{% for deck in desiredByUser %}
+										<ul class="deck" id="{{deck.deckString}}">{{deck.name}}</ul>
+									{% endfor %}
+								</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			{% endif %}
 		</div>
 
 		<div class="deckToolTip">
 			<table class="cardList">
 			</table>
 		</div>
+
+		<!-- Hidden form to submit deck to remove from Wishlist -->
+		<form id="friendsForm" action="/profile/friends/{{page}}" method="post">
+			{% csrf_token %}
+			<input type="hidden" id="deleteFriend" name="deleteFriend" value="">
+			<input type="hidden" id="acceptFriend" name="acceptFriend" value="">
+		</form>
 	
 	</div>
 </div>

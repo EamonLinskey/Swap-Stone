@@ -517,101 +517,82 @@ def acceptFriend(userPro, friendPro):
 		# finalize friendship
 		makeFriends(friendPro, userPro)
 
+# This returns a zipped object with the profiles, the decks they desire
+# and the decks they can offer
+def zipProfilesWithDecks(request, profiles, addFriends=False):
+	desiredByUserList = []
+	desiredByMatchList = []
+	fiendStatusList = []
+
+	userPro = request.user.profile
+
+	for profile in profiles:
+		desiredByUser = []
+		desiredByMatch = []
+
+		for deck in profile.wishList.all():
+			if isMakable(deck, userPro):
+				desiredByUser.append({"name": deck.name, "deckString": deck.deckString} )
+		desiredByUserList.append(desiredByUser)
+
+		for deck in userPro.wishList.all():
+			if isMakable(deck, profile):
+				desiredByMatch.append({"name": deck.name, "deckString": deck.deckString})
+		desiredByMatchList.append(desiredByMatch)
+		if addFriends:
+			friends = "notFriends"
+			if userPro.friends.all().filter(id=profile.id).exists():
+				print("friends")
+				friends = "friends"
+			elif userPro.awaitingResponse.all().filter(id=profile.id).exists():
+				friends = "awaiting"
+				print("awaiting")
+			elif userPro.offeredFriendship.all().filter(id=profile.id).exists():
+				print("offered")
+				friends = "offered"
+			fiendStatusList.append(friends)
+	if addFriends:
+		profiles = list(zip(profiles, desiredByUserList, desiredByMatchList, fiendStatusList))
+	else:
+		profiles = list(zip(profiles, desiredByUserList, desiredByMatchList))
+	return profiles
+
 @login_required
 def friends(request, page=1):
-	print("made it into friends")
+	if 'deleteFriend' in request.POST and request.POST['acceptFriend'] != "":
+		friendPro = Profile.objects.get(id=int(request.POST['requestFriend']))
+		request.user.profile.friends.remove(friendPro)
+
+	elif 'acceptFriend' in request.POST and request.POST['acceptFriend'] != "":
+		friendId = int(request.POST['acceptFriend'].strip('"'))
+		friendPro = Profile.objects.get(id=friendId)
+		acceptFriend(request.user.profile, friendPro)
+
 	end = page * MATCH_PER_PAGE
 	start = end - MATCH_PER_PAGE 
 
 	# Get the matches within the indexes
 	userPro = request.user.profile
-	friends = userPro.friends.all()[start:end]
+
+	friends = zipProfilesWithDecks(request, userPro.friends.all())
+	awaiting = zipProfilesWithDecks(request, userPro.awaitingResponse.all())
+	offered = zipProfilesWithDecks(request, userPro.offeredFriendship.all())
 
 	
-	desiredByUserList = []
-	desiredByFriendList = []
-
-	for friend in friends:
-		desiredByUser = []
-		desiredByFriend = []
-
-		for deck in friend.wishList.all():
-			if isMakable(deck, request.user.profile):
-				desiredByUser.append({"name": deck.name, "deckString": deck.deckString} )
-		desiredByUserList.append(desiredByUser)
-
-		for deck in request.user.profile.wishList.all():
-			if isMakable(deck, friend):
-				desiredByFriend.append({"name": deck.name, "deckString": deck.deckString})
-		desiredByFriendList.append(desiredByFriend)
-	#print(f"desiredByUserList: {desiredByUserList}")
-	#print(f"desiredByMatchList: {desiredByMatchList}")
-	#print(f"the type of matches is {type(matches)}")
-	print(f"the frineds are {friends}")
-	print(f"the desiredByUserList are {desiredByUserList}")
-	print(f"the desiredByFriendList are {desiredByFriendList}")
-	friends = list(zip(friends, desiredByUserList, desiredByFriendList))
-	#print(matches)
-	# print(f"queryset: {matches}")
-	# print(f"first 5: {matches[:5]}")
-	# print(f"6-10: {matches[5:10]}")
-	return render(request, "deckShare/friends.html", {"friends": friends, "page":page})
+	return render(request, "deckShare/friends.html", {"friends": friends, "awaiting": awaiting, "offered": offered, "page":page})
 
 
 @login_required
 def matches(request, page=1):
 	if 'requestFriend' in request.POST and request.POST['requestFriend'] != "":
-		# print("there")
-		# print(request)
-		# print(request.POST)
-		# print(request.POST['requestFriend'])
 		friendPro = Profile.objects.get(id=int(request.POST['requestFriend']))
 		requestFriend(request.user.profile, friendPro)
 
 	elif 'acceptFriend' in request.POST and request.POST['acceptFriend'] != "":
-		# print("here")
-		# print(request)
-		print(request.POST)
-		print(request.POST['acceptFriend'])
-		print(type(request.POST['acceptFriend']))
-		stripped = str(request.POST['acceptFriend'])
-		print(stripped)
-
 		friendId = int(request.POST['acceptFriend'].strip('"'))
-		#print(f"frinedId is {friendId} and its type is {type(friendId)}")
 		friendPro = Profile.objects.get(id=friendId)
 		acceptFriend(request.user.profile, friendPro)
-	# potentialMatches = []
-	# matches = []
-	# profile = request.user.profile
-	# for deck in Deck.objects.all():
-	# 	if deck.owner != profile and deck.owner not in potentialMatches:
-	# 		if isMakable(deck, request.user.profile):
-	# 			potentialMatches.append(deck.owner)
-	# print(f"Potmatches: {potentialMatches}")
-
-	# for owner in potentialMatches:
-	# 	print(f"owner is {owner}")
-	# 	for deck in profile.wishList.all():
-	# 		if isMakable(deck, owner):
-	# 			matches.append(deck)
-	# print(f"matches: {matches}")
-	# print("starting filter")
-	# matches = Match.objects.filter(Q(profile1=request.user.profile.matches) | Q(profile2=request.user.profile))
-	# print("filtering complete")
-	# print("starting owners")
-
-	# owners = set()
-	# for match in matches:
-	# 	owners.add(match.deck1.owner)
-	# 	owners.add(match.deck2.owner)
-	#matches = Match.objects.filter(deck2__owner=request.user.profile)
-	# print("owners complete")
-
-
-	#print("filtering complete")
-
-	# indexes for pagation
+	
 	end = page * MATCH_PER_PAGE
 	start = end - MATCH_PER_PAGE 
 
@@ -624,38 +605,7 @@ def matches(request, page=1):
 	desiredByMatchList = []
 	fiendStatus = []
 
-	for match in matches:
-		desiredByUser = []
-		desiredByMatch = []
-
-		for deck in match.wishList.all():
-			if isMakable(deck, request.user.profile):
-				desiredByUser.append({"name": deck.name, "deckString": deck.deckString} )
-		desiredByUserList.append(desiredByUser)
-
-		for deck in request.user.profile.wishList.all():
-			if isMakable(deck, match):
-				desiredByMatch.append({"name": deck.name, "deckString": deck.deckString})
-		desiredByMatchList.append(desiredByMatch)
-		friends = "notFriends"
-		if userPro.friends.all().filter(id=match.id).exists():
-			print("friends")
-			friends = "friends"
-		elif userPro.awaitingResponse.all().filter(id=match.id).exists():
-			friends = "awaiting"
-			print("awaiting")
-		elif userPro.offeredFriendship.all().filter(id=match.id).exists():
-			print("offered")
-			friends = "offered"
-		fiendStatus.append(friends)
-	#print(f"desiredByUserList: {desiredByUserList}")
-	#print(f"desiredByMatchList: {desiredByMatchList}")
-	#print(f"the type of matches is {type(matches)}")
-	matches = list(zip(matches, desiredByUserList, desiredByMatchList, fiendStatus))
-	#print(matches)
-	# print(f"queryset: {matches}")
-	# print(f"first 5: {matches[:5]}")
-	# print(f"6-10: {matches[5:10]}")
+	matches = zipProfilesWithDecks(request, matches, True)
 	return render(request, "deckShare/matches.html", {"matches": matches, "page":page})#, "desiredByUser": desiredByUserList, "desiredByMatch": desiredByMatchList})#, "owners": list(owners)})
 
 @login_required
