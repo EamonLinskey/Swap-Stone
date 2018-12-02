@@ -483,9 +483,104 @@ def deleteAllMatches():
 	for match in Match.objects.all():
 		match.delete()
 
+def makeFriends(friendA, friendB):
+	friendA.awaitingResponse.remove(friendB)
+	friendA.offeredFriendship.remove(friendB)
+
+	friendB.awaitingResponse.remove(friendA)
+	friendB.offeredFriendship.remove(friendA)
+
+	# The friends relationship is symeterical so it is only needed on one side
+	friendA.friends.add(friendB)
+
+
+def requestFriend(userPro, friendPro):
+	# Checking if frined request is valid from requesters side
+	if (not userPro.friends.all().filter(id=friendPro.id).exists()
+	and not userPro.awaitingResponse.all().filter(id=friendPro.id).exists()
+	and not userPro.offeredFriendship.all().filter(id=friendPro.id).exists()):
+
+		# Checks friend status on recievers side
+		if friendPro.awaitingResponse.all().filter(id=userPro.id).exists():
+			# finalize friendship
+			makeFriends(friendPro, userPro)
+		else:
+			# begin friendship
+			userPro.awaitingResponse.add(friendPro)
+			friendPro.offeredFriendship.add(userPro)
+
+def acceptFriend(userPro, friendPro):
+	# check for valid frienship request
+	if not (userPro.friends.all().filter(id=friendPro.id).exists()
+	and userPro.offeredFriendship.all().filter(id=friendPro.id).exists() 
+	and friendPro.awaitingResponse.all().filter(id=userPro.id).exists()):
+		# finalize friendship
+		makeFriends(friendPro, userPro)
+
+@login_required
+def friends(request, page=1):
+	print("made it into friends")
+	end = page * MATCH_PER_PAGE
+	start = end - MATCH_PER_PAGE 
+
+	# Get the matches within the indexes
+	userPro = request.user.profile
+	friends = userPro.friends.all()[start:end]
+
+	
+	desiredByUserList = []
+	desiredByFriendList = []
+
+	for friend in friends:
+		desiredByUser = []
+		desiredByFriend = []
+
+		for deck in friend.wishList.all():
+			if isMakable(deck, request.user.profile):
+				desiredByUser.append({"name": deck.name, "deckString": deck.deckString} )
+		desiredByUserList.append(desiredByUser)
+
+		for deck in request.user.profile.wishList.all():
+			if isMakable(deck, friend):
+				desiredByFriend.append({"name": deck.name, "deckString": deck.deckString})
+		desiredByFriendList.append(desiredByFriend)
+	#print(f"desiredByUserList: {desiredByUserList}")
+	#print(f"desiredByMatchList: {desiredByMatchList}")
+	#print(f"the type of matches is {type(matches)}")
+	print(f"the frineds are {friends}")
+	print(f"the desiredByUserList are {desiredByUserList}")
+	print(f"the desiredByFriendList are {desiredByFriendList}")
+	friends = list(zip(friends, desiredByUserList, desiredByFriendList))
+	#print(matches)
+	# print(f"queryset: {matches}")
+	# print(f"first 5: {matches[:5]}")
+	# print(f"6-10: {matches[5:10]}")
+	return render(request, "deckShare/friends.html", {"friends": friends, "page":page})
+
 
 @login_required
 def matches(request, page=1):
+	if 'requestFriend' in request.POST and request.POST['requestFriend'] != "":
+		# print("there")
+		# print(request)
+		# print(request.POST)
+		# print(request.POST['requestFriend'])
+		friendPro = Profile.objects.get(id=int(request.POST['requestFriend']))
+		requestFriend(request.user.profile, friendPro)
+
+	elif 'acceptFriend' in request.POST and request.POST['acceptFriend'] != "":
+		# print("here")
+		# print(request)
+		print(request.POST)
+		print(request.POST['acceptFriend'])
+		print(type(request.POST['acceptFriend']))
+		stripped = str(request.POST['acceptFriend'])
+		print(stripped)
+
+		friendId = int(request.POST['acceptFriend'].strip('"'))
+		#print(f"frinedId is {friendId} and its type is {type(friendId)}")
+		friendPro = Profile.objects.get(id=friendId)
+		acceptFriend(request.user.profile, friendPro)
 	# potentialMatches = []
 	# matches = []
 	# profile = request.user.profile
@@ -521,10 +616,13 @@ def matches(request, page=1):
 	start = end - MATCH_PER_PAGE 
 
 	# Get the matches within the indexes
-	matches = request.user.profile.matches.all()[start:end]
+	userPro = request.user.profile
+	matches = userPro.matches.all()[start:end]
+	print(userPro.matches)
 	
 	desiredByUserList = []
 	desiredByMatchList = []
+	fiendStatus = []
 
 	for match in matches:
 		desiredByUser = []
@@ -539,16 +637,26 @@ def matches(request, page=1):
 			if isMakable(deck, match):
 				desiredByMatch.append({"name": deck.name, "deckString": deck.deckString})
 		desiredByMatchList.append(desiredByMatch)
-
+		friends = "notFriends"
+		if userPro.friends.all().filter(id=match.id).exists():
+			print("friends")
+			friends = "friends"
+		elif userPro.awaitingResponse.all().filter(id=match.id).exists():
+			friends = "awaiting"
+			print("awaiting")
+		elif userPro.offeredFriendship.all().filter(id=match.id).exists():
+			print("offered")
+			friends = "offered"
+		fiendStatus.append(friends)
 	#print(f"desiredByUserList: {desiredByUserList}")
 	#print(f"desiredByMatchList: {desiredByMatchList}")
 	#print(f"the type of matches is {type(matches)}")
-	matches = list(zip(matches, desiredByUserList, desiredByMatchList))
+	matches = list(zip(matches, desiredByUserList, desiredByMatchList, fiendStatus))
 	#print(matches)
 	# print(f"queryset: {matches}")
 	# print(f"first 5: {matches[:5]}")
 	# print(f"6-10: {matches[5:10]}")
-	return render(request, "deckShare/matches.html", {"matches": matches})#, "desiredByUser": desiredByUserList, "desiredByMatch": desiredByMatchList})#, "owners": list(owners)})
+	return render(request, "deckShare/matches.html", {"matches": matches, "page":page})#, "desiredByUser": desiredByUserList, "desiredByMatch": desiredByMatchList})#, "owners": list(owners)})
 
 @login_required
 def generous(request):
@@ -587,7 +695,9 @@ def tests(request):
 	for i in range(500):
 		username = 'bulktest' + str(i)
 		email = username + '@email.com'
-		testUsers.append(User(username=username, email=email, password=BULK_USER_PASS, first_name="bulktest"))
+		tmpUser = User(username=username, email=email, first_name="bulktest")
+		tmpUser.set_password(BULK_USER_PASS)
+		testUsers.append(tmpUser)
 	User.objects.bulk_create(testUsers)
 	
 	exampleUser = User.objects.get(username="EamonLinskey")

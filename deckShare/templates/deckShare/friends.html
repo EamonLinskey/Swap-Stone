@@ -2,7 +2,6 @@
 
 {% block body %}
 {% load static %}
-<script src= "{% static "deckShare/scripts/matches.js" %}"></script>
 <script src= "{% static "deckShare/scripts/bundle.js" %}"></script>
 <div class="background-containter">
 	<div class="heading">Well Met, {{user.username}}</div>
@@ -11,7 +10,7 @@
 			<table class="table table-striped">
 			<thead>
 				<tr>
-					<th scope="col">Match</th>
+					<th scope="col">Friend</th>
 					<th scope="col">They can lend You</th>
 					<th scope="col">You can lend Them</th>
 				</tr>
@@ -32,23 +31,14 @@
 						</tr>
 					{% endif %}
 				{% endfor %} -->
-				{% for match, desiredByUser, desiredByMatch, friends in matches %}
+				{% for friend, desiredByUser, desiredByFriend in friends %}
 					<tr>
 						<td>
-							<div>{{match.user.username}}</div>
-							{% if friends == "notFriends" %}
-								<div><button id="{{match.id}}" class="btn btn-primary requestFriends">Add Friend</button></div>
-							{% elif friends == "friends" %}
-								<div>You are friends with {{match.blizzTag}}</div>
-							{% elif friends == "awaiting" %}
-								<div>Waiting for response</div>
-							{% elif friends == "offered"%}
-								<div>This user wants to be friends!</div>
-								<div><button id="{{match.id}}" class="btn btn-success acceptFriends">Accept Friend</button></div>
-							{% endif %}
+							<div>{{friend.user.username}}</div>
+							<div><button id="{{friend.id}}" class="btn btn-warning requestFriends">Delete Friend</button></div>
 						</td>
 						<td>
-							{% for deck in desiredByMatch %}
+							{% for deck in desiredByFriend %}
 								<ul class="deck" id="{{deck.deckString}}">{{deck.name}}</ul>
 							{% endfor %}
 						</td>
@@ -67,13 +57,6 @@
 			<table class="cardList">
 			</table>
 		</div>
-
-		<!-- Hidden form to submit deck to remove from Wishlist -->
-		<form id="friendsForm" action="/profile/matches/{{page}}" method="post">
-			{% csrf_token %}
-			<input type="hidden" id="requestFriend" name="requestFriend" value="">
-			<input type="hidden" id="acceptFriend" name="acceptFriend" value="">
-		</form>
 	
 	</div>
 </div>

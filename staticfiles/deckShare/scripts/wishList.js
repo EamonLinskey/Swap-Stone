@@ -1,5 +1,9 @@
 document.addEventListener('DOMContentLoaded', function(event) {
 
+	if ( window.history.replaceState ) {
+        window.history.replaceState( null, null, window.location.href );
+    }
+
 	trashCans = document.querySelectorAll('.trash')
 	deleteForm = document.getElementById('deleteForm')
 	submitForm = document.getElementById('submitForm')

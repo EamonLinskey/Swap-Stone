@@ -16,6 +16,8 @@ urlpatterns = [
     path("profile/wishList", views.wishList, name="wishList"),
     path("profile/matches/", views.matches, name="matches"),
     path("profile/matches/<int:page>", views.matches, name="matches"),
+    path("profile/friends/", views.friends, name="friends"),
+    path("profile/friends/<int:page>", views.friends, name="friends"),
     path("profile/generous", views.generous, name="generous"),
     path("tests", views.tests, name="tests"),
     
