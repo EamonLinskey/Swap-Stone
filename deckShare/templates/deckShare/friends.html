@@ -51,7 +51,7 @@
 					{% for friend, desiredByUser, desiredByFriend in friends %}
 						<tr>
 							<td>
-								<div>{{friend.user.blizzTag}}</div>
+								<div>{{friend.user.profile.blizzTag}}</div>
 								<div><button id="{{friend.id}}" class="btn btn-warning deleteFriends">Delete Friend</button></div>
 							</td>
 							<td>

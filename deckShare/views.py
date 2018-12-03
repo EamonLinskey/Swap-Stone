@@ -519,42 +519,85 @@ def acceptFriend(userPro, friendPro):
 
 # This returns a zipped object with the profiles, the decks they desire
 # and the decks they can offer
-def zipProfilesWithDecks(request, profiles, addFriends=False):
+def zipProfilesWithDecks(request, profiles, start, end, addFriends=False):
+	index = start
+	maxIndex = profiles.count() -1
+	if end > maxIndex:
+		end = maxIndex
+	print(f"the profiles are {profiles}")
+	print(f"the max index is {maxIndex}")
+	print(f"the end is {end}")
+
+
 	desiredByUserList = []
 	desiredByMatchList = []
 	fiendStatusList = []
+	profilesList = []
+	profilesToRemove = []
 
 	userPro = request.user.profile
 
-	for profile in profiles:
+	# I use a while loop instead of a for loop here because 
+	# matches are tied to profiles rather then decks, when 
+	# a deck is deleted it does not invalidate the match. 
+	# Therefore I have to clean out old matches while looping 
+	# through them. In order to keep matches per page constant 
+	# I have to be able to change in index as I iterate
+	while index <= end:
+		print(f"the index is {index}")
 		desiredByUser = []
 		desiredByMatch = []
 
-		for deck in profile.wishList.all():
+		for deck in profiles[index].wishList.all():
 			if isMakable(deck, userPro):
 				desiredByUser.append({"name": deck.name, "deckString": deck.deckString} )
-		desiredByUserList.append(desiredByUser)
+		
 
 		for deck in userPro.wishList.all():
-			if isMakable(deck, profile):
+			if isMakable(deck, profiles[index]):
 				desiredByMatch.append({"name": deck.name, "deckString": deck.deckString})
-		desiredByMatchList.append(desiredByMatch)
+
+
 		if addFriends:
 			friends = "notFriends"
-			if userPro.friends.all().filter(id=profile.id).exists():
+			if userPro.friends.all().filter(id=profiles[index].id).exists():
 				print("friends")
 				friends = "friends"
-			elif userPro.awaitingResponse.all().filter(id=profile.id).exists():
+			elif userPro.awaitingResponse.all().filter(id=profiles[index].id).exists():
 				friends = "awaiting"
 				print("awaiting")
-			elif userPro.offeredFriendship.all().filter(id=profile.id).exists():
+			elif userPro.offeredFriendship.all().filter(id=profiles[index].id).exists():
 				print("offered")
 				friends = "offered"
-			fiendStatusList.append(friends)
+
+		if desiredByUser == [] or desiredByMatch == []:
+			print("made it here")
+			profilesToRemove.append(profiles[index])
+			if not addFriends:
+				desiredByUserList.append(desiredByUser)
+				desiredByMatchList.append(desiredByMatch)
+				profilesList.append(profiles[index])
+			if end < maxIndex:
+				end += 1
+		else:
+			desiredByUserList.append(desiredByUser)
+			desiredByMatchList.append(desiredByMatch)
+			profilesList.append(profiles[index])
+			if addFriends:
+				fiendStatusList.append(friends)
+		index += 1
+	
+		print(f"profilesList is {profilesList}")
+		print(f"desiredByUserList is {desiredByUserList}")
+		print(f"desiredByMatchList is {desiredByMatchList}")
+		print(f"fiendStatusList is {fiendStatusList}")
 	if addFriends:
-		profiles = list(zip(profiles, desiredByUserList, desiredByMatchList, fiendStatusList))
+		profiles = list(zip(profilesList, desiredByUserList, desiredByMatchList, fiendStatusList))
 	else:
-		profiles = list(zip(profiles, desiredByUserList, desiredByMatchList))
+		profiles = list(zip(profilesList, desiredByUserList, desiredByMatchList))
+
+	request.user.profile.matches.remove(*profilesToRemove)
+	
 	return profiles
 
 @login_required
@@ -568,15 +611,15 @@ def friends(request, page=1):
 		friendPro = Profile.objects.get(id=friendId)
 		acceptFriend(request.user.profile, friendPro)
 
-	end = page * MATCH_PER_PAGE
-	start = end - MATCH_PER_PAGE 
+	#end = page * MATCH_PER_PAGE
+	#start = end - MATCH_PER_PAGE 
 
 	# Get the matches within the indexes
 	userPro = request.user.profile
 
-	friends = zipProfilesWithDecks(request, userPro.friends.all())
-	awaiting = zipProfilesWithDecks(request, userPro.awaitingResponse.all())
-	offered = zipProfilesWithDecks(request, userPro.offeredFriendship.all())
+	friends = zipProfilesWithDecks(request, userPro.friends.all(), 0, userPro.friends.all().count() -1)
+	awaiting = zipProfilesWithDecks(request, userPro.awaitingResponse.all(), 0, userPro.awaitingResponse.all().count() -1)
+	offered = zipProfilesWithDecks(request, userPro.offeredFriendship.all(), 0, userPro.offeredFriendship.all().count() -1)
 
 	
 	return render(request, "deckShare/friends.html", {"friends": friends, "awaiting": awaiting, "offered": offered, "page":page})
@@ -598,14 +641,15 @@ def matches(request, page=1):
 
 	# Get the matches within the indexes
 	userPro = request.user.profile
-	matches = userPro.matches.all()[start:end]
 	print(userPro.matches)
 	
 	desiredByUserList = []
 	desiredByMatchList = []
 	fiendStatus = []
 
-	matches = zipProfilesWithDecks(request, matches, True)
+	matches = zipProfilesWithDecks(request, userPro.matches.all(), start, end -1, True)
+	print(f"user pro is {userPro.matches.all()}")
+	print(f"matches is {matches}")
 	return render(request, "deckShare/matches.html", {"matches": matches, "page":page})#, "desiredByUser": desiredByUserList, "desiredByMatch": desiredByMatchList})#, "owners": list(owners)})
 
 @login_required
