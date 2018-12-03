@@ -4,9 +4,15 @@ document.addEventListener('DOMContentLoaded', function(event) {
         window.history.replaceState( null, null, window.location.href );
     }
 
-	friendsForm = document.getElementById('friendsForm')
-	requestFriendsBtns = document.querySelectorAll('.requestFriends')
-	acceptFriendsBtns = document.querySelectorAll('.acceptFriends')
+	let friendsForm = document.getElementById('friendsForm')
+	let requestFriendsBtns = document.querySelectorAll('.requestFriends')
+	let acceptFriendsBtns = document.querySelectorAll('.acceptFriends')
+	let prevBtn = document.querySelector('.prevPage')
+	let nextBtn = document.querySelector('.nextPage')
+
+	// Get page number from url
+	let splitUrl = window.location.pathname.split("/")
+	let pageNum = parseInt(splitUrl.pop())
 
 
 	for(let button of requestFriendsBtns){
@@ -24,5 +30,20 @@ document.addEventListener('DOMContentLoaded', function(event) {
 			friendsForm.submit()
 		}
 	}
+
+	prevBtn.onclick = function ()  {
+		pageNum --;
+		splitUrl.push(pageNum.toString())
+		let url = splitUrl.join("/")
+		window.location.replace(url)
+	}
+
+	nextBtn.onclick = function ()  {
+		pageNum ++;
+		splitUrl.push(pageNum.toString())
+		let url = splitUrl.join("/")
+		window.location.replace(url)
+	}
+
 
 });

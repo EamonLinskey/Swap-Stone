@@ -18,6 +18,7 @@ import time
 import json
 import requests
 import random
+import math
 
 from swapstone.settings_secret import BULK_USER_PASS
 
@@ -637,10 +638,13 @@ def matches(request, page=1):
 		acceptFriend(request.user.profile, friendPro)
 	
 	end = page * MATCH_PER_PAGE
-	start = end - MATCH_PER_PAGE 
+	start = end - MATCH_PER_PAGE
+
 
 	# Get the matches within the indexes
 	userPro = request.user.profile
+	matchCount = userPro.matches.count()
+	pageMax =  math.ceil(matchCount / MATCH_PER_PAGE)
 	print(userPro.matches)
 	
 	desiredByUserList = []
@@ -650,7 +654,7 @@ def matches(request, page=1):
 	matches = zipProfilesWithDecks(request, userPro.matches.all(), start, end -1, True)
 	print(f"user pro is {userPro.matches.all()}")
 	print(f"matches is {matches}")
-	return render(request, "deckShare/matches.html", {"matches": matches, "page":page})#, "desiredByUser": desiredByUserList, "desiredByMatch": desiredByMatchList})#, "owners": list(owners)})
+	return render(request, "deckShare/matches.html", {"matches": matches, "page":page, "pageMax":pageMax})#, "desiredByUser": desiredByUserList, "desiredByMatch": desiredByMatchList})#, "owners": list(owners)})
 
 @login_required
 def generous(request):

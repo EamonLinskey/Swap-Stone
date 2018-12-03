@@ -61,6 +61,16 @@
 				{% endfor %}
 			</tbody>
 		</table>
+		<div class="page-btn-container">
+			<span>
+				{% if page > 1 %}
+					<button class="btn prevPage">Prev</button>
+				{% endif %}
+				{% if page < pageMax %}
+					<button class="btn nextPage">Next</button>
+				{% endif %}
+			</span>
+		</div>
 		</div>
 
 		<div class="deckToolTip">
