@@ -5,3 +5,4 @@ requests
 requests_oauthlib
 django-heroku
 hearthstone
+django-private-chat

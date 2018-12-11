@@ -35,6 +35,10 @@ ALLOWED_HOSTS = ['swapstone.herokuapp.com',
                  'localhost',
                  '127.0.0.1']
 
+CHAT_WS_SERVER_HOST = 'localhost'
+CHAT_WS_SERVER_PORT = 5002
+CHAT_WS_SERVER_PROTOCOL = 'ws'
+
 
 # Application definition
 
@@ -46,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_private_chat',
 ]
 
 MIDDLEWARE = [
