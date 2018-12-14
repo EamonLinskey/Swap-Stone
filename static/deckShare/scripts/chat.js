@@ -7,37 +7,51 @@ function showTime(message){
 }
 
 document.addEventListener('DOMContentLoaded', function(event) {
-    let friend =  ""
-    var activeSockets = []
+    let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
 
+    // This is a socket which listens for messages from other users. It should always be open while on the chat page
+    let listererSocket = new ReconnectingWebSocket(`${ws_scheme}://${window.location.host}/profile/friends/chat/${user}`);
 
-    function setChatroom(usernames){
-        for(let socket of activeSockets){
-            console.log(socket)
-            socket.close()
-        }
+    listererSocket.onmessage = function(message) {
+        var data = JSON.parse(message.data);
+        console.log("message recieved")
+        console.log(`the data is ${data["message"]}`)
+
+        var messageArea = document.querySelector(".messageArea")
         
-        let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-        let chatroom = usernames.sort().join('-')
-        console.log(`${ws_scheme}://${window.location.host}/profile/friends/chat/${chatroom}`)
-        chatSocket = new ReconnectingWebSocket(`${ws_scheme}://${window.location.host}/profile/friends/chat/${chatroom}`);
-        console.log(typeof chatSocket)
-        chatSocket.onmessage = function(message) {
-            var data = JSON.parse(message.data);
-            console.log("message recieved")
-            console.log(`the data is ${data["message"]}`)
+        messageArea.innerHTML += `<div onmouseover="showTime(this)" id='${data['timeStamp']}' class='message'>${data['message']} \n </div>`
+    };
 
-            var messageArea = document.querySelector(".messageArea")
-            
-            messageArea.innerHTML += `<div onmouseover="showTime(this)" id='${data['timeStamp']}' class='message'>${data['message']} \n </div>`
-        };
 
-        chatSocket.onclose = function(e) {
-            console.error('Chat socket closed unexpectedly');
+    // This is the socket which sends chats to other users. It will change depending on which caht is open
+    let senderSocket = null
+
+    let friend = ""
+
+    function setChatroom(username){
+        if(senderSocket){
+            senderSocket.close()
+        }
+        newSenderSocket = new ReconnectingWebSocket(`${ws_scheme}://${window.location.host}/profile/friends/chat/${username}`);
+
+        newSenderSocket.onclose = function(e) {
+            console.error('Chat was closed');
         };
-        activeSockets = [chatSocket];
+        
+        return newSenderSocket
     }
-    
+
+
+    let msgBtns = document.querySelectorAll(".messageFriends");
+
+    for(let btn of msgBtns){
+        btn.onclick = function () {
+            friend = btn.getAttribute('id');
+            senderSocket = setChatroom(friend)
+            document.querySelector(".chatbox").value = '';
+        }
+    }
+
     let sendBtn = document.querySelector(".send-message-button");
 
     sendBtn.onclick = function ()  {
@@ -49,24 +63,64 @@ document.addEventListener('DOMContentLoaded', function(event) {
             timeStamp: + new Date()
         }
         console.log(message)
-        chatSocket.send(JSON.stringify(message));
+        senderSocket.send(JSON.stringify(message));
         document.querySelector(".pendingMessage").value = ""
 
     }
-
-    let msgBtns = document.querySelectorAll(".messageFriends");
-
-    for(let btn of msgBtns){
-        btn.onclick = function () {
-            friend = btn.getAttribute('id');
-            setChatroom([user, friend])
-            document.querySelector(".chatbox").value = '';
-        }
-    }
-
-    //setChatroom(["phil", "lil"])
-
-
-
 });
+
+
+
+
+
+
+
+
+    // let friend =  ""
+    // var activeSockets = []
+
+
+    // function setChatroom(username){
+    //     for(let socket of activeSockets){
+    //         console.log(socket)
+    //         socket.close()
+    //     }
+        
+    //     let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+    //     console.log(`${ws_scheme}://${window.location.host}/profile/friends/chat/${username}`)
+    //     chatSocket = new ReconnectingWebSocket(`${ws_scheme}://${window.location.host}/profile/friends/chat/${username}`);
+        
+    //     chatSocket.onmessage = function(message) {
+    //         var data = JSON.parse(message.data);
+    //         console.log("message recieved")
+    //         console.log(`the data is ${data["message"]}`)
+
+    //         var messageArea = document.querySelector(".messageArea")
+            
+    //         messageArea.innerHTML += `<div onmouseover="showTime(this)" id='${data['timeStamp']}' class='message'>${data['message']} \n </div>`
+    //     };
+
+    //     chatSocket.onclose = function(e) {
+    //         console.error('Chat socket closed unexpectedly');
+    //     };
+    //     activeSockets = [chatSocket];
+    // }
+    
+    
+
+    // let msgBtns = document.querySelectorAll(".messageFriends");
+
+    // for(let btn of msgBtns){
+    //     btn.onclick = function () {
+    //         friend = btn.getAttribute('id');
+    //         setChatroom(user)
+    //         document.querySelector(".chatbox").value = '';
+    //     }
+    // }
+
+    // //setChatroom(["phil", "lil"])
+
+
+
+// });
 
