@@ -13,13 +13,15 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 import os
 import django_heroku
 import dj_database_url
+import random
+import string
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 
-SECRET_KEY = os.getenv('SECRET_KEY', "abcdefghijklmnopqrstuvwxyz123456789")
+SECRET_KEY = os.getenv('SECRET_KEY', "".join(random.choice(string.printable) for i in range(40)))
 
 LOGIN_URL = '/signIn'
 
@@ -39,6 +41,7 @@ ALLOWED_HOSTS = ['swapstone.herokuapp.com',
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'deckShare.apps.DeckshareConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -80,6 +83,17 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'swapstone.wsgi.application'
+ASGI_APPLICATION = 'swapstone.routing.application'
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
+        },
+    },
+}
 
 
 # Database

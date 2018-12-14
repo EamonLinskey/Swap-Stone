@@ -525,9 +525,9 @@ def zipProfilesWithDecks(request, profiles, start, end, addFriends=False):
 	maxIndex = profiles.count() -1
 	if end > maxIndex:
 		end = maxIndex
-	print(f"the profiles are {profiles}")
-	print(f"the max index is {maxIndex}")
-	print(f"the end is {end}")
+	#print(f"the profiles are {profiles}")
+	#print(f"the max index is {maxIndex}")
+	#print(f"the end is {end}")
 
 
 	desiredByUserList = []
@@ -545,7 +545,7 @@ def zipProfilesWithDecks(request, profiles, start, end, addFriends=False):
 	# through them. In order to keep matches per page constant 
 	# I have to be able to change in index as I iterate
 	while index <= end:
-		print(f"the index is {index}")
+		#print(f"the index is {index}")
 		desiredByUser = []
 		desiredByMatch = []
 
@@ -562,17 +562,17 @@ def zipProfilesWithDecks(request, profiles, start, end, addFriends=False):
 		if addFriends:
 			friends = "notFriends"
 			if userPro.friends.all().filter(id=profiles[index].id).exists():
-				print("friends")
+				#print("friends")
 				friends = "friends"
 			elif userPro.awaitingResponse.all().filter(id=profiles[index].id).exists():
 				friends = "awaiting"
-				print("awaiting")
+				#print("awaiting")
 			elif userPro.offeredFriendship.all().filter(id=profiles[index].id).exists():
-				print("offered")
+				#print("offered")
 				friends = "offered"
 
 		if desiredByUser == [] or desiredByMatch == []:
-			print("made it here")
+			#print("made it here")
 			profilesToRemove.append(profiles[index])
 			if not addFriends:
 				desiredByUserList.append(desiredByUser)
@@ -588,10 +588,10 @@ def zipProfilesWithDecks(request, profiles, start, end, addFriends=False):
 				fiendStatusList.append(friends)
 		index += 1
 	
-		print(f"profilesList is {profilesList}")
-		print(f"desiredByUserList is {desiredByUserList}")
-		print(f"desiredByMatchList is {desiredByMatchList}")
-		print(f"fiendStatusList is {fiendStatusList}")
+		#print(f"profilesList is {profilesList}")
+		#print(f"desiredByUserList is {desiredByUserList}")
+		#print(f"desiredByMatchList is {desiredByMatchList}")
+		#print(f"fiendStatusList is {fiendStatusList}")
 	if addFriends:
 		profiles = list(zip(profilesList, desiredByUserList, desiredByMatchList, fiendStatusList))
 	else:

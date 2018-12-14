@@ -65,6 +65,15 @@
     margin-left: 1%
 }
 
+/* For Chatbox */
+.chatbox {
+    background-color: white;
+    font-size: 20px;
+    width: 300px;
+    height: 350px;
+    float: right;
+}
+
 /* For WishList*/
 .deckName{
     width: 10vw;

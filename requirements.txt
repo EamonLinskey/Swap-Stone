@@ -5,3 +5,5 @@ requests
 requests_oauthlib
 django-heroku
 hearthstone
+channels
+asgi_redis

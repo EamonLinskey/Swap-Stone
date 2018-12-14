@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from django.contrib.postgres.fields import JSONField
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
@@ -65,3 +66,9 @@ class Generous(models.Model):
 	#objects = GenerousManager()
 	def __str__(self):
 		return f"{deck.name}"
+
+class Message(models.Model):
+    sender = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='sender')
+    reciever = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='reciever')
+    message = models.TextField()
+    timestamp = models.DateTimeField(default=timezone.now, db_index=True)
