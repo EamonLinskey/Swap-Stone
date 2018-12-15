@@ -71,4 +71,4 @@ class Message(models.Model):
     sender = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='sender')
     reciever = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='reciever')
     message = models.TextField()
-    timestamp = models.DateTimeField(default=timezone.now, db_index=True)
+    timeOfMessage = models.BigIntegerField()

@@ -20,8 +20,8 @@ import string
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-
-SECRET_KEY = os.getenv('SECRET_KEY', "".join(random.choice(string.printable) for i in range(40)))
+SECRET_KEY = os.getenv('SECRET_KEY', "abcdefghijklmnopqrstuvwxyz1234567890")
+# SECRET_KEY = os.getenv('SECRET_KEY', "".join(random.choice(string.printable) for i in range(40)))
 
 LOGIN_URL = '/signIn'
 

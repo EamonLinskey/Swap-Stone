@@ -1,27 +1,21 @@
-# from channels.generic.websocket import WebsocketConsumer
-# import json
-
-# class ChatConsumer(WebsocketConsumer):
-#     def connect(self):
-#         self.accept()
-
-#     def disconnect(self, close_code):
-#         pass
-
-#     def receive(self, text_data):
-#         text_data_json = json.loads(text_data)
-#         message = text_data_json['message']
-#         print(message)
-#         print(text_data)
-
-#         self.send(text_data=json.dumps({
-#             'message': message
-#         }))
-
-# chat/consumers.py
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 import json
+from deckShare.models import Profile, Message
+
+
+def addMessageToDB(data):
+    print(f"the data is {data}")
+    print(data['sender'])
+    sender = Profile.objects.get(blizzTag=data['sender'])
+    reciever = Profile.objects.get(blizzTag=data['reciever'])
+    message = data['message']
+    timeStamp = data['timeStamp']
+    print(type(timeStamp))
+    timeStamp = 10
+    message = Message(sender=sender, reciever=reciever, message=message, timeOfMessage=timeStamp)
+    message.save()
+
 
 class ChatConsumer(WebsocketConsumer):
     def connect(self):
@@ -50,7 +44,12 @@ class ChatConsumer(WebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
         timeStamp = text_data_json['timeStamp']
-        print(f"recieved message from Websocket: {message}")
+        sender = text_data_json['sender']
+        username = text_data_json['username']
+        
+        if(username != self.chatroom):
+            addMessageToDB(text_data_json)
+
         # Send message to room group
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
@@ -64,7 +63,7 @@ class ChatConsumer(WebsocketConsumer):
     # Receive message from room group
     def chat_message(self, event):
         message = event['message']
-        print(event)
+        #print(event)
         timeStamp = event['timeStamp']
 
         print(f"recieved message from GroupRoom: {message}")
