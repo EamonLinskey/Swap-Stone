@@ -6,49 +6,47 @@ function showTime(message){
     document.querySelector(".timeStamp").innerHTML = timeStamp
 }
 
+
+
 document.addEventListener('DOMContentLoaded', function(event) {
+    // console.log(messages)
+    // console.log(Object.keys(messages))
+    // console.log(messages["bulktest0"]);
+        
+    for(let key of Object.keys(messages) ){
+        console.log(key)
+        console.log(messages[key])
+    }
+
     let ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
 
     // This is a socket which listens for messages from other users. It should always be open while on the chat page
-    let listererSocket = new ReconnectingWebSocket(`${ws_scheme}://${window.location.host}/profile/friends/chat/${user}`);
+    let socket = new ReconnectingWebSocket(`${ws_scheme}://${window.location.host}/profile/friends/chat/${user}`);
 
-    listererSocket.onmessage = function(message) {
-        var data = JSON.parse(message.data);
-        console.log("message recieved")
-        console.log(`the data is ${data["message"]}`)
-
-        var messageArea = document.querySelector(".messageArea")
-        
+    socket.onmessage = function(message) {
+        let data = JSON.parse(message.data);
+        let messageArea = document.querySelector(".messageArea")
         messageArea.innerHTML += `<div onmouseover="showTime(this)" id='${data['timeStamp']}' class='message'>${data['message']} \n </div>`
     };
 
-
-    // This is the socket which sends chats to other users. It will change depending on which caht is open
-    let senderSocket = null
-
     let friend = ""
-
-    function setChatroom(username){
-        if(senderSocket){
-            senderSocket.close()
-        }
-        newSenderSocket = new ReconnectingWebSocket(`${ws_scheme}://${window.location.host}/profile/friends/chat/${username}`);
-
-        newSenderSocket.onclose = function(e) {
-            console.error('Chat was closed');
-        };
-        
-        return newSenderSocket
-    }
+    let recieverTag = ""
 
 
     let msgBtns = document.querySelectorAll(".messageFriends");
 
     for(let btn of msgBtns){
         btn.onclick = function () {
-            friend = btn.getAttribute('id');
-            senderSocket = setChatroom(friend)
+            console.log("clicked message btn")
+            friend = btn.getAttribute('username');
+            recieverTag = btn.getAttribute('blizztag');
+            let messageArea = document.querySelector(".messageArea")
+            messageArea.innerHTML = ""
             document.querySelector(".chatbox").value = '';
+            document.querySelector(".chatboxTitle").innerHTML = `${friend} (${recieverTag})`;
+            for(let message of messages[recieverTag]){
+                messageArea.innerHTML += `<div onmouseover="showTime(this)" id='${message['timeStamp']}' class='message'>${message['message']} \n </div>`
+            }
         }
     }
 
@@ -57,16 +55,15 @@ document.addEventListener('DOMContentLoaded', function(event) {
     sendBtn.onclick = function ()  {
         console.log("clicked me")
         let message = {
-            username: user,
-            sender: blizzTag,
-            reciever: friend,
+            senderUsername: user,
+            senderBlizzTag: blizzTag,
+            recieverUsername: friend,
+            recieverBlizzTag: recieverTag, 
             message: document.querySelector(".pendingMessage").value,
             timeStamp: + new Date()
         }
         console.log(message)
-        senderSocket.send(JSON.stringify(message));
-        // sending on the listener keeps current chat updated
-        listererSocket.send(JSON.stringify(message));
+        socket.send(JSON.stringify(message));
         document.querySelector(".pendingMessage").value = ""
 
     }

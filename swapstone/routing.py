@@ -3,6 +3,7 @@
 from django.urls import path
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.security.websocket import OriginValidator
 from . import consumers
 
 
@@ -13,9 +14,12 @@ websocket_urlpatterns = [
 
 application = ProtocolTypeRouter({
     # (http->django views is added by default)
-    'websocket': AuthMiddlewareStack(
-        URLRouter(
-            websocket_urlpatterns
-        )
-    ),
+    "websocket": OriginValidator(
+	    AuthMiddlewareStack(
+	        URLRouter(
+	            websocket_urlpatterns
+	        )
+	    ),
+	    ["http://127.0.0.1:8000"]
+	),
 })

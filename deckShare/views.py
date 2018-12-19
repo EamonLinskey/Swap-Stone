@@ -10,7 +10,7 @@ from django.db.models import Q, Max
 from requests_oauthlib import OAuth2Session
 from hearthstone.deckstrings import Deck as DeckHearth
 from hearthstone.enums import FormatType
-from .models import Deck, Profile
+from .models import Deck, Profile, Message
 import re
 import os
 import datetime
@@ -601,9 +601,19 @@ def zipProfilesWithDecks(request, profiles, start, end, addFriends=False):
 	
 	return profiles
 
+def getMessages(profile):
+	messages = {}
+	friends = profile.friends.all()
+	#userMessages = Message.objects.filter(Q(sender=profile) | Q(reciever=profile))
+	for friend in friends:
+		userMessages = Message.objects.filter((Q(sender=friend) | Q(reciever=friend)) & (Q(sender=profile) | Q(reciever=profile))).order_by('-timeOfMessage')[:15]
+		messages[friend.blizzTag] = list(userMessages.values())
+	print(messages)
+	return json.dumps(messages)
+
 @login_required
 def friends(request, page=1):
-	if 'deleteFriend' in request.POST and request.POST['acceptFriend'] != "":
+	if 'deleteFriend' in request.POST and request.POST['deleteFriend'] != "":
 		friendPro = Profile.objects.get(id=int(request.POST['requestFriend']))
 		request.user.profile.friends.remove(friendPro)
 
@@ -622,8 +632,11 @@ def friends(request, page=1):
 	awaiting = zipProfilesWithDecks(request, userPro.awaitingResponse.all(), 0, userPro.awaitingResponse.all().count() -1)
 	offered = zipProfilesWithDecks(request, userPro.offeredFriendship.all(), 0, userPro.offeredFriendship.all().count() -1)
 
+
+	messages = getMessages(userPro);
+
 	
-	return render(request, "deckShare/friends.html", {"friends": friends, "awaiting": awaiting, "offered": offered, "page":page})
+	return render(request, "deckShare/friends.html", {"friends": friends, "awaiting": awaiting, "offered": offered, "messages":messages, "page":page})
 
 
 @login_required

@@ -36,6 +36,7 @@ class Profile(models.Model):
 	time = models.FloatField(blank=False, default = 0)
 	collection = JSONField(blank=True, null=True)
 	latestActivity = models.IntegerField(blank=True, null=True)
+	channelHash =models.CharField(blank=True, null=True, max_length=100)
 	def __str__(self):
 		return f"{self.user.username}'s profile"
 

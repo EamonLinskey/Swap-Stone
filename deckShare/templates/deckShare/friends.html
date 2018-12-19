@@ -7,14 +7,20 @@
 <script>
 	var user = "{{user.username}}"
 	var blizzTag = "{{user.profile.blizzTag}}"
+	var messages = {{messages | safe }}
+	console.log(JSON.parse( JSON.stringify(messages)));
 </script>
 <script src= "{% static "deckShare/scripts/chat.js" %}"></script>
 <script src= "https://cdn.jsdelivr.net/npm/moment@2.23.0/moment.min.js"></script>
-<script>
-    console.log(moment().format());
-</script>
+
 <div class="background-containter">
 	<div class="heading">Well Met, {{user.username}}</div>
+	{{messages}}
+	{% for partner, set in messages.items %}
+		{% for message in set %}
+			{{message.message}}
+		{% endfor %}
+	{% endfor %}
 	<div class="container">
 		<div class="Matches">
 			{% if offered|length > 0%}
@@ -62,7 +68,7 @@
 							<td>
 								<div>{{friend.user.profile.blizzTag}}</div>
 								<div><button id="{{friend.id}}" class="btn btn-warning deleteFriends">Delete Friend</button></div>
-								<div><button id="{{friend.user.username}}" class="btn btn-sucess messageFriends">Message Friend</button></div>
+								<div><button username="{{friend.user.username}}" class="btn btn-sucess messageFriends" blizztag="{{friend.user.profile.blizzTag}}">Message Friend</button></div>
 							</td>
 							<td>
 								{% for deck in desiredByFriend %}
@@ -124,6 +130,7 @@
 
 
 		<div class="chatbox">
+			<div class="chatboxTitle"></div>
 			<div class="messageArea"></div>
 			<div class="messagebar">
 				<textarea rows="1" cols="50" class="pendingMessage" placeholder="Message Here"></textarea>
