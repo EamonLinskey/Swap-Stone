@@ -1,1 +1,1 @@
-A web app that allows hearthstone users to load their collections in via HsReplay's Api, in order to match users who have complimentary card collections. This allows users to try new decks and make new friends in game
+A web app that allows hearthstone users to load their collections in via HsReplay's Api, in order to match users who have complimentary card collections. This allows users to try new decks and make new friends in game.
